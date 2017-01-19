@@ -15,6 +15,7 @@ mkdir <- function(baseDir_v,
 } # mkdir
 
 
+# Read Mageck count files and combine into matrix using sgRNA identity as "grouping" variable
 getMageckMergeMatrix <- function(mageckDir_v){
   # Get directory, files, and names
   mageckFiles_v <- list.files(mageckDir_v)
@@ -123,3 +124,37 @@ getMageckMergeMatrix <- function(mageckDir_v){
   rownames(mageckMergeCounts_mat) <- mageckMergeCounts_dt$label
   return(mageckMergeCounts_mat)
 } #getMageckMergeMatrix(mageckDir_v)
+
+
+# Cat information to log file rather than stdout in the console
+lcat <- function(..., file_v = logFile_v){
+    output_v <- c(..., "\n")
+    cat(output_v, file = file_v)
+    } # lcat()
+
+
+# Transform a list of vectors of different lengths into a data.table
+# Pad shorter vectors with NA's
+listToDataTable <- function(input_lsv){
+  
+  # Get maximum vector length
+  maxLength_v <- max(unlist(lapply(input_lsv, function(x) length(x))))
+  
+  # Function to extend each vector in list with NA's to match length of maximum vector
+  addNAToVector <- function(listElement_v, maxLength_v){
+    difference_v <- maxLength_v - length(listElement_v)
+    NAToAdd_v <- rep(NA, times = difference_v)
+    newElement_v <- append(listElement_v, NAToAdd_v)
+    return(newElement_v)
+  } # addNAToVector
+  
+  # Apply NA-adding function to each vector in list
+  output_lsv <- lapply(input_lsv, function(x,y) addNAToVector(x, maxLength_v))
+  
+  # Convert to data.table
+  output_dt <- as.data.table(output_lsv)
+  
+  # Return
+  return(output_dt)
+} # listToDataTable()
+
