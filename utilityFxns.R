@@ -61,9 +61,15 @@ getMageckMergeMatrix <- function(mageckDir_v, fileRegex_v = "^.*JT_|.count.txt")
       assign(name_v, merge(eval(as.name(firstName_v)), mageckData_lsdt[[i]], all = T, suffixes = c(paste0(".", i-1), paste0(".", i))))
     } # fi
   } # for i
-  # Need to get the first column and all the columns with samplex
+  # Need to get the first column and all the columns with samples
+  # Sometimes last column is not updated with sample1.i and is just sample1
   allCols_v <- c("V2", countCols_v)
-  mageckMergeCounts_dt <- eval(as.name(name_v))[,mget(allCols_v)]
+  altAllCols_v <- c("V2", countCols_v[1:length(countCols_v)-1], "sample1")
+  
+  mageckMergeCounts_dt <- tryCatch(
+    {outDt <- eval(as.name(name_v))[,mget(allCols_v)]}, 
+    error = function(e){outDt <- eval(as.name(name_v))[,mget(altAllCols_v)]
+  })
   
   # Add column names
   colnames(mageckMergeCounts_dt) <- c("label", mageckNames_v)
