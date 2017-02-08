@@ -112,3 +112,20 @@ listToDataTable <- function(input_lsv){
   return(output_dt)
 } # listToDataTable()
 
+###
+### matToDataTable #########################################################################################################
+###
+
+# Take a matrix and conver to data.table, while taking the rowNames and making them the 1st column of data.table
+
+matToDataTable <- function(inputData_mat, colName_v){
+  # Convert
+  outputData_dt <- as.data.table(inputData_mat)
+  # Add rownames as column
+  outputData_dt[[colName_v]] <- rownames(inputData_mat)
+  # Reorder columns
+  outputData_dt <- outputData_dt[,c(ncol(outputData_dt), (1:(ncol(outputData_dt)-1))), with = F]
+  # return
+  return(outputData_dt)
+} # matToDataTable
+
