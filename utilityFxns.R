@@ -135,3 +135,16 @@ matToDataTable <- function(inputData_mat, colName_v){
   return(outputData_dt)
 } # matToDataTable
 
+
+###
+### Rd to markdown #########################################################################################################
+###
+
+# from: http://stackoverflow.com/questions/27451937/render-package-documentation-into-github-wiki
+
+rd_to_markdown <- function(rd) {
+  html <-  paste(rd, ".html", sep = "")
+  tools::Rd2HTML(tools::parse_Rd(rd), out = html)
+  system( paste("pandoc -s -r html ", html, " -o ", rd, ".text", sep=""))
+  unlink(html)
+}
