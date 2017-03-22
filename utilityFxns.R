@@ -1,22 +1,34 @@
 # Home for general utility functions
 
 ###
-### mkdir ##################################################################################################################
+### makeDir ##################################################################################################################
 ###
 
-mkdir <- function(baseDir_v, 
-                  newDir_v){
-  # Create new file for writing (if doesn't exist)
-  # baseDir_v: some sort of file path to where new files should be written
-  # newDir_v:  character vector of name of new directory to write files to
-  tempDir_v <- file.path(baseDir_v, newDir_v)
-  if(dir.exists(tempDir_v)){
-    return(tempDir_v)
-  } else {
-    dir.create(tempDir_v)
-    return(tempDir_v)
+mkdir <- function(base_dir_v, 
+                  new_dir_v){
+    #' Creates new directory in which to write files
+    #' @description
+    #' Given a base directory and string, will check if specified directory exits, and make it if not.
+    #' @param base_dir_v Character string. Relative or absolute path to directory that will hold new directory
+    #' @param new_dir_v Character string. Name of new directory.
+    #' @return Character string of path to new directory. Makes directory in file system.
+    #' @examples 
+    #' makeDir("~/", "makeDir_test")
+  # Concatenate to final path
+  temp_dir_v <- file.path(base_dir_v, new_dir_v)
+  # Add trailing slash, if absent
+  if (substring(temp_dir_v, nchar(temp_dir_v)) != "/") {
+    temp_dir_v <- paste0(temp_dir_v, "/")
   } # fi
-} # mkdir
+  # Make if doesn't already exist
+  if(dir.exists(temp_dir_v)){
+    return(temp_dir_v)
+  } else {
+    dir.create(temp_dir_v)
+    # Return string of path
+    return(temp_dir_v)
+  } # fi
+} # makeDir
 
 ###
 ### getMageckMergeMatrix ###################################################################################################
@@ -148,3 +160,53 @@ rd_to_markdown <- function(rd) {
   system( paste("pandoc -s -r html ", html, " -o ", rd, ".text", sep=""))
   unlink(html)
 }
+
+
+###
+### returnSessionInfo #########################################################################################################
+###
+
+returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL){
+    #' Print various session information
+    #' @description Print general R session info, current date/time, and loaded git repo versions to stdout or file. Note
+    #' this uses sessionInfo() from base R, but an argument could be made to use session_info() from devtools.
+    #' @param out_dir_v optional directory to write information to. Default is to print to stdout
+    #' @param load_dirs_v vector of directory paths that have been source in script.
+    #' @value multiple lines of text printed to stdout or written to file
+    #' @export
+
+    ## Get information
+    info_v <- sessionInfo()
+    date_v <- date()
+    
+    if (!is.null(load_dirs_v)){
+        hashes_v <- sapply(load_dirs_v, function(x){
+            setwd(x)
+            system("git rev-parse --short HEAD", intern = T)
+        })
+        git_hashes_df <- as.data.frame(hashes_v)
+    } else {
+        git_hashes_df <- "No sourced repos"
+    } # fi
+
+    ## Default: print to stdout
+    if (is.null(out_dir_v)){
+        cat("Session Info:\n"); print(info_v)
+        cat("Date of Run:\n"); print(date_v)
+        cat("Git repo commits:\n"); print(git_hashes_df)
+    } else {
+        ## Option: write to file
+        file_v <- file.path(out_dir_v, "session_info.txt")
+        file_conn <- file(file_v)
+        writeLines(c("Session Info:\n", capture.output(info_v)), file_conn)
+        file_conn <- file(file_v, "a")
+        write(c("\nDate of Run:\n", date_v), file_conn, append = T)
+        file_conn <- file(file_v, "a")
+        write(c("\nGit repo commits:\n", capture.output(git_hashes_df)), file_conn, append = T)
+        close(file_conn)
+    }
+} # returnSessionInfo
+
+
+
+        
