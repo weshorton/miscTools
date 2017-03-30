@@ -167,11 +167,12 @@ rd_to_markdown <- function(rd) {
 ###
 
 returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL){
-    #' Print various session information
+    #' Output session information
     #' @description Print general R session info, current date/time, and loaded git repo versions to stdout or file. Note
     #' this uses sessionInfo() from base R, but an argument could be made to use session_info() from devtools.
     #' @param out_dir_v optional directory to write information to. Default is to print to stdout
-    #' @param load_dirs_v vector of directory paths that have been source in script.
+    #' @param load_dirs_v vector of directory paths that have been sourced in script. Note, if using the utility function
+    #' sourceDir, these will be the same paths.
     #' @value multiple lines of text printed to stdout or written to file
     #' @export
 
