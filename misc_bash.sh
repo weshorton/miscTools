@@ -32,3 +32,4 @@ echoerr() { printf "%s\n" "$*" >&2; }
 ### bash; rename; delimiter
 ### If file names are: LIB170313LC_S9_R2_001.fastq.gz; and want them to be LIB170313LC_S9_S9_R2_001.fastq.gz
 for i in *.gz; do mv "$i" "$(echo $i | awk -F "_" -v OFS="_" '{print $1, $2, $2, $3, $4}')"; done
+
