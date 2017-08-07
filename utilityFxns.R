@@ -209,5 +209,87 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL){
 } # returnSessionInfo
 
 
+###
+### splitChar #################################################################################################################
+###
+
+splitChar <- function(vector_v){
+    #' Split character string
+    #' @description Split character string into vector where length(output) == nchar(input)
+    #' @param vector_v any character vector that needs to be separated into its component parts
+    #' @value another vector of length == nchar(input)
+    #' @export
+
+    out_vector_v <- unlist(strsplit(vector_v, split = ''), use.names = F)
+
+    return(out_vector_v)
+} # splitChar
+
+
+###
+### Detach Packages ##########################################################################################################
+###
+
+### Taken from Stack Overflow - https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+
+detachAllPackages <- function() {
+    #' Clear loaded packages
+    #' @description Clear all loaded packages (excluding base). Useful for determining if a script has the appropriate packages loaded
+    #' @value None
+    #' @export
+
+    ## Define basic packages to ignore
+    basePackages_v <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+
+    ## Extract attached packages from package/object list
+    allPackages_v <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+
+    ## Remove base packages
+    removePackages_v <- setdiff(allPackages_v, basePackages_v)
+
+    if (length(removePackages_v) > 0){
+        for (package in removePackages_v) {
+            detach(package, character.only=TRUE)
+        } # for
+    } # fi
+} # detachAllPackages
+
+###
+### Merge Multiple Data.Tables ##########################################################################################################
+###
+
+mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v) {
+    #' Merge many data.tables together
+    #' Take many data.tables and merge on and ID column, extracting a single column from each data.table as the column of interest
+    #' @param data_lsdt list of data.tables to merge
+    #' @param mergeCol_v which column from all of the data.tables to use to merge
+    #' @param keepCol_v which column from all of the data.tables to use as the column of interest
+    #' @value data.table with ncol == length(data_lsdt) + 1. Column names are names of list, or defaults to V1, V2,...
+    #' export
+
+    ## Create initial table by extracting the 2 columns of interest from the rest
+    merge_dt <- data_lsdt[[1]][,mget(c(mergeCol_v, keepCol_v))]
+
+    ## Create initial column names (first check if list has names and add if not)
+    if (is.null(names(data_lsdt))) {
+        names_v <- paste("V", 1:length(data_lsdt))
+        names(data_lsdt) <- names_v
+    } # fi
+    
+    colNames_v <- c(mergeCol_v, names(data_lsdt)[1])
+
+    for (i in 2:length(data_lsdt)) {
+        ## Perform merge
+        merge_dt <- merge(merge_dt,
+                          data_lsdt[[i]][,mget(c(mergeCol_v, keepCol_v))],
+                          by = mergeCol_v,
+                          all = T, sort = F)
+        ## Update column names
+        colNames_v <- c(colNames_v, names(data_lsdt)[i])
+        ## Rename columns
+        colnames(merge_dt) <- colNames_v
+    } # for
+    return(merge_dt)
+} # mergeDTs
 
         
