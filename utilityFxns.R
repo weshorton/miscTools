@@ -14,6 +14,8 @@ mkdir <- function(base_dir_v,
     #' @return Character string of path to new directory. Makes directory in file system.
     #' @examples 
     #' makeDir("~/", "makeDir_test")
+    #' @export
+    
   # Concatenate to final path
   temp_dir_v <- file.path(base_dir_v, new_dir_v)
   # Add trailing slash, if absent
@@ -265,7 +267,7 @@ mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v) {
     #' @param mergeCol_v which column from all of the data.tables to use to merge
     #' @param keepCol_v which column from all of the data.tables to use as the column of interest
     #' @value data.table with ncol == length(data_lsdt) + 1. Column names are names of list, or defaults to V1, V2,...
-    #' export
+    #' @export
 
     ## Create initial table by extracting the 2 columns of interest from the rest
     merge_dt <- data_lsdt[[1]][,mget(c(mergeCol_v, keepCol_v))]
