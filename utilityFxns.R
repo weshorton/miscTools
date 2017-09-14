@@ -179,6 +179,9 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = N
     #' @value multiple lines of text printed to stdout or written to file
     #' @export
 
+    ## Close all connections
+    closeAllConnections()
+    
     ## Get information
     info_v <- sessionInfo()
     date_v <- date()
@@ -212,7 +215,8 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = N
     } else {
         
         ## Option: write to file
-        file_v <- file.path(out_dir_v, paste0(Sys.Date(), "_session_info.txt"))
+        outData_v <- paste(strsplit(as.character(Sys.time()), split = ' ')[[1]][1:2], collapse = "_")
+        file_v <- file.path(out_dir_v, paste0(outData_v, "_session_info.txt"))
         file_conn <- file(file_v)
         writeLines(c("Session Info:\n", capture.output(info_v)), file_conn)
         file_conn <- file(file_v, "a")
@@ -223,6 +227,9 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = N
         write(c("\nArguments Passed:\n", capture.output(args_lsv)), file_conn, append = T)
         close(file_conn)
     } # fi
+
+    ## Close connections
+    closeAllConnections()
     
 } # returnSessionInfo
 
