@@ -168,13 +168,14 @@ rd_to_markdown <- function(rd) {
 ### returnSessionInfo #########################################################################################################
 ###
 
-returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL){
+returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = NULL){
     #' Output session information
     #' @description Print general R session info, current date/time, and loaded git repo versions to stdout or file. Note
     #' this uses sessionInfo() from base R, but an argument could be made to use session_info() from devtools.
     #' @param out_dir_v optional directory to write information to. Default is to print to stdout
     #' @param load_dirs_v vector of directory paths that have been sourced in script. Note, if using the utility function
     #' sourceDir, these will be the same paths.
+    #' @param args_lsv optional list of arguments used as input. Could be from optparse (easiest), or can hand-make a list of arguments.
     #' @value multiple lines of text printed to stdout or written to file
     #' @export
 
@@ -183,31 +184,46 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL){
     date_v <- date()
     
     if (!is.null(load_dirs_v)){
+        
         hashes_v <- sapply(load_dirs_v, function(x){
             setwd(x)
             system("git rev-parse --short HEAD", intern = T)
         })
+        
         git_hashes_df <- as.data.frame(hashes_v)
+        
     } else {
+        
         git_hashes_df <- "No sourced repos"
+        
     } # fi
+
+    if (is.null(args_lsv)) args_lsv <- "No arguments given."
+        
 
     ## Default: print to stdout
     if (is.null(out_dir_v)){
-        cat("Session Info:\n"); print(info_v)
-        cat("Date of Run:\n"); print(date_v)
-        cat("Git repo commits:\n"); print(git_hashes_df)
+        
+        cat("Session Info:\n\n"); print(info_v)
+        cat("\nDate of Run:\n"); print(date_v)
+        cat("\nGit repo commits:\n"); print(git_hashes_df)
+        cat("\nArguments Passed:\n"); print(args_lsv)
+        
     } else {
+        
         ## Option: write to file
-        file_v <- file.path(out_dir_v, "session_info.txt")
+        file_v <- file.path(out_dir_v, paste0(Sys.Date(), "_session_info.txt"))
         file_conn <- file(file_v)
         writeLines(c("Session Info:\n", capture.output(info_v)), file_conn)
         file_conn <- file(file_v, "a")
         write(c("\nDate of Run:\n", date_v), file_conn, append = T)
         file_conn <- file(file_v, "a")
         write(c("\nGit repo commits:\n", capture.output(git_hashes_df)), file_conn, append = T)
+        file_conn <- file(file_v, "a")
+        write(c("\nArguments Passed:\n", capture.output(args_lsv)), file_conn, append = T)
         close(file_conn)
-    }
+    } # fi
+    
 } # returnSessionInfo
 
 
