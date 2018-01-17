@@ -285,7 +285,7 @@ detachAllPackages <- function() {
 
 mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v = NULL, ...) {
     #' Merge many data.tables together
-    #' Take many data.tables and merge on and ID column, extracting a single column from each data.table as the column of interest
+    #' @description Take many data.tables and merge on and ID column, extracting a single column from each data.table as the column of interest
     #' @param data_lsdt list of data.tables to merge
     #' @param mergeCol_v which column from all of the data.tables to use to merge
     #' @param keepCol_v which column from all of the data.tables to use as the column of interest. If NULL, use all columns
@@ -347,4 +347,66 @@ mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v = NULL, ...) {
     return(merge_dt)
 } # mergeDTs
 
-        
+
+###
+### Geometric Mean ##########################################################################################################
+###
+
+geomMean <- function(counts_v) {
+  #' Find geometric mean of vector of values
+  #' @param counts_v numeric vector of values
+  #' @value geometric mean of vector
+  #' @export
+   
+  ## Get product of vector
+  prod_v <- prod(counts_v)
+  
+  ## Get length of vector
+  length_v <- length(counts_v)
+  
+  ## Apply formula; geomMean = (X1*X2*X3*...Xn)^(1/n)
+  geomMean_v <- prod_v^(1/length_v)
+  return(geomMean_v)
+} # geomMean
+
+
+###
+### 45 degree column names for pheatmap (taken from https://stackoverflow.com/questions/15505607/diagonal-labels-orientation-on-x-axis-in-heatmaps)
+###
+
+draw_colnames_45 <- function (coln, gaps, ...) {
+  coord = pheatmap:::find_coordinates(length(coln), gaps)
+  x = coord$coord - 0.5 * coord$size
+  res = textGrob(coln, x = x, y = unit(1, "npc") - unit(3,"bigpts"), vjust = 0.5, hjust = 1, rot = 45, gp = gpar(...))
+  return(res)}
+
+### Have to add the following in the script that's using pheatmap in order for it to work:
+# assignInNamespace(x="draw_colnames", value="draw_colnames_45",
+#                  ns=asNamespace("pheatmap"))
+
+###
+### NA to O Data.table #########################################################################################################
+###
+
+naTo0 <- function(data_dt, cols_v){
+  if (is.numeric(cols_v)){
+    ## By column number
+    for (j in seq_len(ncol(data_dt))) set(data_dt,which(is.na(data_dt[[j]])),j,0)
+  } else {
+    ## By column names
+    for (j in names(data_dt)) set(data_dt, which(is.na(data_dt[[j]])),j,0)
+  } # fi
+  return(data_dt)
+} # naTo0
+
+
+###
+### Standard ggplot theme ###############
+###
+
+my_theme <- theme_classic() +
+    theme(plot.title = element_text(hjust = 0.5, size = 18),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 12),
+          legend.title = element_text(size = 14))
