@@ -1,5 +1,7 @@
 # Home for general utility functions
 
+library(ggplot2)
+
 ###
 ### makeDir ##################################################################################################################
 ###
@@ -385,7 +387,7 @@ draw_colnames_45 <- function (coln, gaps, ...) {
 #                  ns=asNamespace("pheatmap"))
 
 ###
-### NA to O Data.table #########################################################################################################
+### NA to O Data.table ##########################################################################################################
 ###
 
 naTo0 <- function(data_dt, cols_v){
@@ -401,7 +403,7 @@ naTo0 <- function(data_dt, cols_v){
 
 
 ###
-### Standard ggplot theme ###############
+### Standard ggplot theme #######################################################################################################
 ###
 
 my_theme <- theme_classic() +
@@ -410,3 +412,39 @@ my_theme <- theme_classic() +
           axis.title = element_text(size = 14),
           legend.text = element_text(size = 12),
           legend.title = element_text(size = 14))
+
+
+###
+### Extract ggplot legend #######################################################################################################
+###
+
+### Taken from stack overflow...can't remember link
+
+g_legend <- function(a.gplot){
+    tmp <- ggplot_gtable(ggplot_build(a.gplot))
+    leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend <- tmp$grobs[[leg]]
+    return(legend)}
+
+###
+### Special head ################################################################################################################
+###
+
+mhead <- function(data_df){
+    ## data_df is matrix, data.frame, or data.table
+    print(data_df[1:5,1:5])
+} # mhead
+
+###
+### Notice ######################################################################################################################
+###
+
+notice <- function(statement_v) {
+    ## Statement is some sort of character. Could even be a sprintf message.
+#    print("#   ### ### # #")
+#    print("#   # # # # ##")
+#    print("### ### ### # #")
+    cat("#   ### ### # #\n#   # # # # ##\n### ### ### # #\n\n")
+    cat(statement_v)
+    cat("\n\n\n")
+} # notice
