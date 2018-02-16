@@ -1,6 +1,31 @@
 # Home for general utility functions
 
 library(ggplot2)
+library(grid); library(gridExtra); library(gtable)
+
+############################ Table of contents #############################
+###                                                                      ###
+###   mkdir                     create new directory                     ###
+###   getMageckMergeMatrix      (old) merge files                        ###
+###   lcat                      cat to log rather than console           ###
+###   listToDataTable           xform list of vector to dt. Pad with NA  ###
+###   matToDataTable            xform mat to dt. rownames(mat) = dt[,1]  ###
+###   rd_to_markdown            not sure...                              ###
+###   returnSessionInfo         makes detailed log of session            ###
+###   splitChar                 split character string                   ###
+###   detachAllPackages         clear loaded packages                    ###
+###   mergeDTs                  merge dts                                ###
+###   geomMean                  geometric mean of vector                 ###
+###   draw_colnames_45          adjust pheatmap colnames                 ###
+###   naTo0                     convert NA in a dt to 0, by column       ###
+###   my_theme                  custom ggplot2 theme                     ###
+###   g_legend                  extract legend from ggplot               ###
+###   mhead                     print mat[1:n,1:n]                       ###
+###   notice                    very easy to find print statement        ###
+###   myTableGrob               custom table_grob                        ###
+###   plotSpecial               plot gplot with table grobs              ###
+###                                                                      ###
+############################################################################
 
 ###
 ### makeDir ##################################################################################################################
@@ -391,6 +416,13 @@ draw_colnames_45 <- function (coln, gaps, ...) {
 ###
 
 naTo0 <- function(data_dt, cols_v){
+  #' Convert NA's in a data.table to 0
+  #' @description Given a set of columns, convert all NA values in those columns to 0
+  #' @param data_dt data.table with NAs in some columns
+  #' @param cols_v vector of either column indices or column names that have NAs to be replaced
+  #' @value data.table with same dim(), but NAs are now 0 for all cols_v
+  #' @export
+  
   if (is.numeric(cols_v)){
     ## By column number
     for (j in seq_len(ncol(data_dt))) set(data_dt,which(is.na(data_dt[[j]])),j,0)
@@ -413,6 +445,18 @@ my_theme <- theme_classic() +
           legend.text = element_text(size = 12),
           legend.title = element_text(size = 14))
 
+###
+### Big Label  ggplot theme #####################################################################################################
+###
+
+big_label <- theme_classic() +
+    theme(plot.title = element_text(hjust = 0.5, size = 20),
+          axis.text = element_text(size = 16),
+          axis.text.y = element_text(angle = 45),
+          axis.title = element_text(size = 18),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 18))
+
 
 ###
 ### Extract ggplot legend #######################################################################################################
@@ -421,6 +465,12 @@ my_theme <- theme_classic() +
 ### Taken from stack overflow...can't remember link
 
 g_legend <- function(a.gplot){
+  #' Extract ggplot legend
+  #' @description Extract legend as separate table from ggplot object
+  #' @param a.gplot a ggplot object with a legend
+  #' @value a gtable object of the legend
+  #' @export
+  
     tmp <- ggplot_gtable(ggplot_build(a.gplot))
     leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
     legend <- tmp$grobs[[leg]]
@@ -430,9 +480,15 @@ g_legend <- function(a.gplot){
 ### Special head ################################################################################################################
 ###
 
-mhead <- function(data_df){
-    ## data_df is matrix, data.frame, or data.table
-    print(data_df[1:5,1:5])
+mhead <- function(data_df, n = 5){
+  #' Special head for table-like objects
+  #' @description Show first n rows and columns of data.table/data.frame/matrix. Good for tables with many columns
+  #' @param data_df any data.table, data.frame, or matrix
+  #' @param n number of rows and columns to subset by. Default is 5
+  #' @value prints to console data_df[1:n,1:n]
+  #' @export
+    
+    print(data_df[1:n,1:n])
 } # mhead
 
 ###
@@ -440,11 +496,91 @@ mhead <- function(data_df){
 ###
 
 notice <- function(statement_v) {
-    ## Statement is some sort of character. Could even be a sprintf message.
-#    print("#   ### ### # #")
-#    print("#   # # # # ##")
-#    print("### ### ### # #")
+  #' Print easy-to-find statement
+  #' @description Print a specified statement after a large ASCII "LOOK" statement.
+  #' @param statement_v Some sort of character vector. Can be a paste() call, an sprintf message, etc.
+  #' @value print to console
+  #' @export
+    
     cat("#   ### ### # #\n#   # # # # ##\n### ### ### # #\n\n")
     cat(statement_v)
     cat("\n\n\n")
 } # notice
+
+
+###
+### Table Grob ##################################################################################################################
+###
+
+myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
+  #' Create custom table grob with title
+  #' @description Creates table grob in format that is most common for my usage.
+  #' @param data_dt Data.table that the grob will be made out of
+  #' @param title_v Title for display
+  #' @param fontsize_v Fontsize for title. Default is 14 (goes will with my_theme)
+  #' @value gtable object
+  #' @export
+  
+  ## Table
+  table_grob <- tableGrob(data_dt, rows = rep('', nrow(data_dt)))
+  ## Title
+  title_grob <- textGrob(title_v, gp = gpar(fontsize = fontsize_v))
+  ## Add title
+  table_grob <- gtable_add_rows(table_grob, heights = grobHeight(title_grob) + unit(5,'mm'), pos = 0)
+  table_grob <- gtable_add_grob(table_grob, title_grob, 1, 1, 1, ncol(table_grob))
+}
+
+
+###
+### Plot Special ################################################################################################################
+###
+
+plotSpecial <- function(grobs_ls, loc_lsv = list("vpPlot" = c(width = 0.65, height = 1, x = 0.3, y = 0.5),
+                                                 "vpLeg" = c(width = 0.25, height = 0.7, x = 0.7, y = 0.88),
+                                                 "vpTab" = c(width = 0.45, height = 0.3, x = 0.7, y = 0.6)),
+                        file_v = NA){
+  #' Plot ggplot with extra table grob
+  #' @description Plot ggplot object, legend, and at least one other information table
+  #' @param grobs_ls list of grobs to plot (must be same length as loc_lsv).
+  #' @param loc_lsv list of viewport location arguments. Each list element must have 4 elements in order of width, height, x, y. Must be same length as grobs_ls. vpPlot, vpLeg, and vpTab are required.
+  #' @param file_v file to output plot to. Must be pdf.
+  #' @details Works differently depending on if main plot is a ggplot2 object or a pheatmap (or other) object. For ggplot2 object: Minimum length is 3 objects (plot, legend, table). Table should
+  #' be created using myTableGrob or similar. Legend should be made using g_legend. Defaults work just fine. For pheatmap object, the pheatmap must be saved to an object by using
+  #' myObj <- grid::grid.grabExpr(pheatmap(data_dt, options)). myObj is then the first grob in grobs_ls. As of right now, I can't extract the legend from pheatmap, so grobs_ls will actually only
+  #' be a length of 2 as a minimum (heatmap and table). The loc_lsv can still work with the default 3 (the vpLeg will be removed), but will also work if just two are specified. When ggplot2 is used
+  #' the loc_lsv names aren't important, but when pheatmap is used, the loc_lsv names must be vpPlot and vpTab.
+  #' @value print plot to viewer or as pdf
+  #' @export
+  
+  ## Make Viewports
+  vp_ls <- sapply(loc_lsv, function(z) viewport(width = z[1], height = z[2], x = z[3], y = z[4]), simplify = F)
+  
+  ## Subset Viewports if not ggplot
+  if (!"ggplot" %in% class(grobs_ls[[1]])){
+    vp_ls[["vpLeg"]] <- NULL
+  }
+  
+  ## Open file and/or new page
+  if (!is.na(file_v)) pdf(file = file_v)
+  grid.newpage()
+  
+  ## ggplot printing
+  if ("ggplot" %in% class(grobs_ls[[1]])){
+    print(grobs_ls[[1]] + theme(legend.position = "none"), vp = vp_ls[[1]])
+  }
+  
+  ## non-ggplot printing
+  if (!"ggplot" %in% class(grobs_ls[[1]])){
+    pushViewport(vp_ls[[1]])
+    grid.draw(grobs_ls[[1]])
+  }
+  
+  ## Plot rest
+  for (i in 2:length(vp_ls)){
+    upViewport(0)
+    pushViewport(vp_ls[[i]])
+    grid.draw(grobs_ls[[i]])
+  } # for i
+  if (!is.na(file_v)) dev.off()
+  
+}
