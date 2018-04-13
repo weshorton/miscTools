@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#SBATCH --partition          exacloud                # partition (queue)
+#SBATCH --nodes              1                       # number of nodes
+#SBATCH --ntasks             1                       # number of "tasks" to be allocated for the job
+#SBATCH --ntasks-per-core    1                       # Max number of "tasks" per core.
+#SBATCH --cpus-per-task      10                       # Set if you know a task requires multiple processors
+##SBATCH --mem-per-cpu        8000                    # Memory required per allocated CPU (mutually exclusive with mem)
+#SBATCH --mem                32000                  # memory pool for each node
+#SBATCH --time               0-24:00                 # time (D-HH:MM)
+#SBATCH --output             getSRA_%j.out        # Standard output
+#SBATCH --error              getSRA_%j.err        # Standard error
+
+BASE=/home/exacloud/lustre1/SchedinLab/publicData/
+
+MYBIN=$BASE/code/10_getSRA.sh
+
+### Arguments
+#EXP_ID=$1         # Should be a BioProject ID number, such as PRJNA251383
+#RUNSRA=$2         # logical, indicating if SRA download should be run or not
+#REF=$3            # path to directory for reference files
+#OUT1=$4           # path to desired output directory for SRA download
+
+
+$MYBIN PRJNA251383 T $BASE/code/ref/ $BASE/fastqs erNeg
