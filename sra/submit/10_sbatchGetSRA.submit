@@ -22,4 +22,4 @@ MYBIN=$BASE/code/10_getSRA.sh
 #OUT1=$4           # path to desired output directory for SRA download
 
 
-$MYBIN PRJNA251383 T $BASE/code/ref/ $BASE/fastqs erNeg
+$MYBIN PRJNA251383 T $BASE/code/ref/ $BASE/fastqs

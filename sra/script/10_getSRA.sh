@@ -6,10 +6,9 @@
 ### Constants ###
 #################
 
-ESEARCH="/home/exacloud/lustre1/users/hortowe/myApps/edirect/esearch"
-EFETCH="/home/exacloud/lustre1/users/hortowe/myApps/edirect/efetch"
-FASTQDUMP="/home/exacloud/lustre1/users/hortowe/myApps/sratoolkit.2.8.2-1/bin/fastq-dump"
-
+MYAPPS="/home/exacloud/lustre1/CompBio/users/hortowe/myApps"
+ESEARCH="$MYAPPS/edirect/esearch"
+EFETCH="$MYAPPS/edirect/efetch"
 
 #################
 ### Arguments ###
@@ -25,9 +24,7 @@ echo $EXP_ID
 echo $RUNSRA
 echo $REF
 echo $OUT1
-echo $RUNSTAR
-echo $OUT2
-
+echo $SUB
 
 ####################
 ### SRA Download ###
@@ -49,8 +46,12 @@ if [ $RUNSRA == T ]; then
     $ESEARCH -db sra -query $EXP_ID | $EFETCH --format runinfo | cut -d ',' -f 1,30 | grep SRR > $REF/sraIDs.txt
 
     ## Subset for desired samples using the matching geo_ids, then cut to just get sra ids
-    grep -f $REF/$SUB/er_geo_ids.txt $REF/sraIDs.txt | cut -d ',' -f 1  > $REF/$SUB/er_sra_ids.txt
-
+    if [ -z "$SUB" ]; then
+        echo "No subset"
+    else
+        echo "Subset for specific IDs"
+        grep -f $REF/$SUB/er_geo_ids.txt $REF/sraIDs.txt | cut -d ',' -f 1  > $REF/$SUB/er_sra_ids.txt
+    fi
 fi
 
 
