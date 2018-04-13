@@ -24,6 +24,9 @@ library(grid); library(gridExtra); library(gtable)
 ###   notice                    very easy to find print statement        ###
 ###   myTableGrob               custom table_grob                        ###
 ###   plotSpecial               plot gplot with table grobs              ###
+###   mvFiles                   Move batch of files to new dir           ###
+###   splitComma                Split character on the commas            ###
+###   rmNARow                   Remove rows with NA in specified col     ###
 ###                                                                      ###
 ############################################################################
 
@@ -584,3 +587,68 @@ plotSpecial <- function(grobs_ls, loc_lsv = list("vpPlot" = c(width = 0.65, heig
   if (!is.na(file_v)) dev.off()
   
 }
+
+###
+### Move Logs ###################################################################################################################
+###
+
+mvFiles <- function(origDir_v, newDir_v, pattern_v = "*\\.log"){
+  #' Move a batch of files to a new directory
+  #' @description Originally developed to move venn diagram log output. Can be used to move any unique set of files to new directory.
+  #' @param origDir_v path to original directory containing the files
+  #' @param newDir_v one of two. (1) path to new directory where files should be moved to. (2) character string of new sub-directory of origDir_v to put files into.
+  #' @param pattern_v some sort of regex to uniquely identify files to move.
+  #' @value moves files at system level
+  #' @export
+  
+  ## Make new directory as sub-directory, if specified
+  if (length(strsplit(newDir_v, split = "/")[[1]]) == 1){
+    newDir_v <- mkdir(origDir_v, newDir_v)
+  } # fi
+  
+  ## Get files to move
+  files_v <- list.files(origDir_v, pattern = pattern_v)
+  
+  ## Move them
+  for (file_v in files_v) file.rename(from = file.path(origDir_v, file_v),
+                                      to = file.path(newDir_v, file_v))
+} # mvFiles
+
+###
+### Split Comma #################################################################################################################
+###
+
+splitComma <- function(string_v){
+    #' Split a string along the commas in the string
+    #' @description Just a concise way to split a string on the commas. Returning a vector of strings instead.
+    #' @param String that will be split
+    #' @value Vector of strings. One element for each section of string that was previously divided by a comma
+    #' @export
+
+    vector_v <- unlist(sapply(string_v, function(x) strsplit(x, split = ","), USE.NAMES = F))
+    return(vector_v)
+} # splitComma
+
+###
+### Rm NA Row ###################################################################################################################
+###
+
+rmNARow <- function(data_dt, cols_v, extract_v = F){
+   #' Remove rows that have NA in certain columns
+   #' @description Remove all rows that have an NA in at least one of the specified column
+   #' @param data_dt data.table to have rows removed
+   #' @param cols_v columns to check for NA in
+   #' @param extract_v logical, TRUE - output the NA rows; FALSE (default) - output the input table with NA rows removed
+   #' @value data.table either containing the offending rows (extract_v == T), or the input table with those rows removed
+   #' export
+  
+   ## Logical of if row is complete or not
+   completeRows_v <- complete.cases(data_dt[,..cols_v])
+  
+   ## Return
+   if (extract_v){
+     return(data_dt[completeRows_v != T,])
+   } else {
+     return(data_dt[completeRows_v,])
+   } # fi
+} # rmNARow
