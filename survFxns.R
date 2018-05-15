@@ -8,24 +8,30 @@
 ###################################
 
 ### Functions that help during survival analysis
-comboSurvFit <- function(surv_obj, genes_v, data_df, cols_v = c("Days", "Response"), median_log = F, pthresh_v = 0.05, plot_v = T){
-  #' Run survival analysis on specified genes
-  #' @description Given a base surival object, input data, and a 3-gene set, run survival analysis on different combinations
-  #' of those genes. If p-value is below threshold, create survival plot. Returns p-values for all combinations.
-  #' Combinations: A+B+C; A+B-C; A-B+C; -A+B+C
+comboSurvFit <- function(surv_obj, genes_v, data_df, cols_v = c("Days", "Response"), median_log = F, zScore_v = F, pthresh_v = 0.05, plot_v = T){
+  #' Run Kaplan-Meier survival estimate on specified gene(s) expression data
+  #' @description Given a base surival object, input data (expression fold-change from baseline), and a 1-3 gene set (columns from expression input), 
+  #' run survival analysis on different combinations of those genes. Does so by adding/subtracting the gene sets in different configurations
+  #' and then converting the expression data to 0 and 1. 0 if value below median, 1 if above.
+  #' If p-value is below threshold, create survival plot. Returns p-values for all combinations.
   #' @param surv_obj object created via Surv(time,event) call
   #' @param genes_v vector of 2 or 3 genes to combine counts
   #' @param data_df count data where rows = patient/sample and columns = genes
   #' @param cols_v clinical information columns contained in data_df
   #' @param median_log TRUE - replace NA values of each gene with its median value. FALSE - keep NAs
+  #' @param zScore_v TRUE - divide patients into 3 groups ("sigLow" (z < -1.96), "sigHigh" (z > 1.96), and "noChange" (-1.96 < z < 1.96)), after
+  #' converting ratio data to z-scores. FALSE - use ratio data to divide groups into "low" (below median value) and "high" (above median value)
   #' @param pthresh_v p-value threshold to determine which survival plots to make
   #' @param plot_v TRUE - print plot; FALSE - no plotting
-  #' @value prints survival plot of significant p-value combinations to console. Outputs vector of p-values, one per combination.
+  #' @value Outputs list with 3 elements. (1) matrix containing plotting data (hi/low divisions and clinical info),
+  #' (2) p-values of the different combinations, (3) calc-matrix to check hi/low designations. nrow(1) == length(2) == nrow(3) and
+  #' also each index is the same.
   #' @export
 
   ## Subset data
   clin_df <- data_df[,cols_v]
-  sub_df <- data_df[,genes_v]
+  sub_df <- data_df[,genes_v, drop = F]
+  
   ## Add median values, if specified
   if (median_log) {
     sub_df <- apply(sub_df, 2, function(x){
@@ -35,30 +41,51 @@ comboSurvFit <- function(surv_obj, genes_v, data_df, cols_v = c("Days", "Respons
       return(x)
     })
   } # fi
-  ## Add and subtract expressions
-  calc_mat <- addSubCols(sub_df)
+  
+  ## Add and subtract expressions (unless doing single-gene)
+  if (ncol(sub_df) > 1){
+    calc_mat <- addSubCols(sub_df)
+  } else {
+    calc_mat <- sub_df
+  }
   comboCols_v <- colnames(calc_mat)
+  
   ## Skip too few measurements
-  naRow_v <- which(apply(calc_mat, 1, function(x) length(which(is.na(x)))) == 4)
+  naRow_v <- which(apply(calc_mat, 1, function(x) length(which(is.na(x)))) == ncol(calc_mat))
   if (length(naRow_v) > nrow(sub_df)*.8) {
     print(sprintf("Skipping combo %s. Fewer than 20 pct of patients had full measurements.", paste(genes_v, collapse = "_")))
-    return(rep(NA, 4))
+    return(rep(NA, ncol(calc_mat)))
   }
-  ## Change to 0 and 1
-  simple_mat <- apply(calc_mat, 2, function(x){
-    med_v <- median(x, na.rm = T)
-    low_v <- which(x<med_v)
-    high_v <- which(x>=med_v)
-    x[low_v] <- 0; x[high_v] <- 1
-    return(x)
-  })
+  
+  ## Divide patients into groups
+  if (zScore_v){
+    simple_mat <- apply(calc_mat, 2, function(x){
+      low_v <- which(x <= -1.96); high_v <- which(x >= 1.96)
+      no_v <- which(x > -1.96 & x < 1.96)
+      x[low_v] <- "sigLow"; x[high_v] <- "sigHigh"; x[no_v] <- "noChange"
+      return(x)
+    })
+  } else {
+    simple_mat <- apply(calc_mat, 2, function(x){
+      med_v <- median(x, na.rm = T)
+      low_v <- which(x<med_v); high_v <- which(x>=med_v)
+      x[low_v] <- "low"; x[high_v] <- "hi"
+      #x <- factor(x, levels = c("low", "hi"))
+      return(x)
+    })
+  }
+  
   ## Combine with clin
   final_mat <- cbind(clin_df, simple_mat)
-  ## Create survdiff objects
+  
+  ## Create survdiff objects (one for each combination)
   sd_ls <- sapply(comboCols_v, function(x) survdiff(surv_obj ~ final_mat[,x]), simplify = F)
+  
+  ## Extract p-value for each survival analysis
   sdp_v <- sapply(sd_ls, function(x) pchisq(x$chisq, df=1, lower=F))
-  ## Return p-values
-  return(list("values" = final_mat, "sig" = sdp_v))
+  
+  ## Return survival data and p-value
+  return(list("values" = final_mat, "sig" = sdp_v, "check_calc" = calc_mat))
 }  
 
 addSubCols <- function(data_df){

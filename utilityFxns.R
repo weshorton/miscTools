@@ -19,6 +19,7 @@ library(grid); library(gridExtra); library(gtable)
 ###   draw_colnames_45          adjust pheatmap colnames                 ###
 ###   naTo0                     convert NA in a dt to 0, by column       ###
 ###   my_theme                  custom ggplot2 theme                     ###
+###   big_label                 Similar to my_theme                      ###
 ###   g_legend                  extract legend from ggplot               ###
 ###   mhead                     print mat[1:n,1:n]                       ###
 ###   notice                    very easy to find print statement        ###
@@ -27,6 +28,9 @@ library(grid); library(gridExtra); library(gtable)
 ###   mvFiles                   Move batch of files to new dir           ###
 ###   splitComma                Split character on the commas            ###
 ###   rmNARow                   Remove rows with NA in specified col     ###
+###   simpleCap                 Capitalize 1st letter of each word       ###
+###   anovaP                    Get p-value from ANOVA summary           ###
+###   nChooseK                  Find # of unique pairwise combos         ###
 ###                                                                      ###
 ############################################################################
 
@@ -460,6 +464,14 @@ big_label <- theme_classic() +
           legend.text = element_text(size = 16),
           legend.title = element_text(size = 18))
 
+###
+### Angle Text theme ############################################################################################################
+###
+
+angle_x <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
+angle_y <- theme(axis.text.y = element_text(angle = 45))
+angle_both <- theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                    axis.text.y = element_text(angle = 45))
 
 ###
 ### Extract ggplot legend #######################################################################################################
@@ -525,7 +537,7 @@ myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
   #' @export
   
   ## Table
-  table_grob <- tableGrob(data_dt, rows = rep('', nrow(data_dt)))
+  table_grob <- tableGrob(data_dt, rows = rep('', nrow(data_dt)), theme = ttheme_minimal())
   ## Title
   title_grob <- textGrob(title_v, gp = gpar(fontsize = fontsize_v))
   ## Add title
@@ -652,3 +664,56 @@ rmNARow <- function(data_dt, cols_v, extract_v = F){
      return(data_dt[completeRows_v,])
    } # fi
 } # rmNARow
+
+
+###
+### Simple Cap ##################################################################################################################
+###
+
+simpleCap <- function(x) {
+  #' Capitalize first letter of each word
+  #' @description given multi-word vector, capitalize the first letter of each word.
+  #' Taken from 'Examples' section of ?toupper
+  #' @param x vector
+  #' @value same as X, but each first letter is capitalized.
+  #' export
+  
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1, 1)), substring(s, 2),
+        sep = "", collapse = " ")
+}
+
+###
+### Anova P #####################################################################################################################
+###
+
+### Extract rounded p-value from anova summary results
+
+anovaP <- function(aov, round_v = T) {
+  #' Extract p-value from anova summary results
+  #' @description Given the summary() results of an aov() run, extract p-value
+  #' @param aov summary.aov object created by summary(aov(y ~ x))
+  #' @param round_v logical. TRUE - round p-value to 3 decimals; FALSE - do not round
+  #' @value numeric vector of p-value.
+  #' export
+  
+  aov <- aov[[1]][["Pr(>F)"]][[1]]
+  aov <- ifelse(round_v, round(aov, digits = 3), aov)
+  return(aov)
+}
+
+###
+### nChooseK ####################################################################################################################
+###
+
+nChooseK <- function(n_v, k_v) {
+  #' n Choose k
+  #' @description Given 'n' elements and combinations of size 'k', find number of unique combinations.
+  #' @param n_v number of possible elements to create combinations
+  #' @param k_v size of combinations (e.g. 3 means all unique combinations of 3 elements from n_v)
+  #' @value numeric vector listing the total number of combinations
+  #' export
+  
+  res_v <- factorial(n_v) / (factorial(k_v) * factorial(n_v - k_v))
+  return(res_v)
+}
