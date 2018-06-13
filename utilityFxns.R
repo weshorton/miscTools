@@ -31,6 +31,8 @@ library(grid); library(gridExtra); library(gtable)
 ###   simpleCap                 Capitalize 1st letter of each word       ###
 ###   anovaP                    Get p-value from ANOVA summary           ###
 ###   nChooseK                  Find # of unique pairwise combos         ###
+###   dupCols                   Find duplicated columns (and remove)     ###
+###   thirds                    Get values of min/low3rd/med/upp3rd/max  ###
 ###                                                                      ###
 ############################################################################
 
@@ -681,7 +683,7 @@ simpleCap <- function(x) {
   s <- strsplit(x, " ")[[1]]
   paste(toupper(substring(s, 1, 1)), substring(s, 2),
         sep = "", collapse = " ")
-}
+} # simpleCap
 
 ###
 ### Anova P #####################################################################################################################
@@ -700,7 +702,7 @@ anovaP <- function(aov, round_v = T) {
   aov <- aov[[1]][["Pr(>F)"]][[1]]
   aov <- ifelse(round_v, round(aov, digits = 3), aov)
   return(aov)
-}
+} # anovaP
 
 ###
 ### nChooseK ####################################################################################################################
@@ -716,4 +718,86 @@ nChooseK <- function(n_v, k_v) {
   
   res_v <- factorial(n_v) / (factorial(k_v) * factorial(n_v - k_v))
   return(res_v)
-}
+} # nChooseK
+
+
+###
+### dupCols #####################################################################################################################
+###
+
+dupCols <- function(data_dt, remove_v = T){
+  #' Duplicated Columns
+  #' @description Identify duplicated column names in a data.table. Print them to console and optionally remove them from data.table.
+  #' Will keep the first occurrence of a column name and remove all subsequent occurrences.
+  #' @param data_dt input data.table with duplicated columns
+  #' @param remove_v logical, TRUE - remove columns; FALSE - do not remove, just print column names to console
+  #' @value data.table same as data_dt, optionally with extra columns removed.
+  #' export
+  
+  ## Count occurrences of each column name
+  colCounts_dt <- as.data.table(table(colnames(data_dt)))
+  
+  ## Extract duplicated columns
+  dupCols_dt <- colCounts_dt[N > 1,]
+  
+  ## Get indexes to remove, for each duplicated column
+  removeIndexes_v <- unlist(sapply(dupCols_dt$V1, function(x){
+    y <- grep(x, colnames(data_dt))
+    z <- y[2:length(y)]
+    return(z)
+  }, simplify = F))
+  
+  ## Print them
+  print("Columns with more than one occurrence: ")
+  print(colnames(data_dt)[removeIndexes_v])
+  
+  ## Remove them
+  if (remove_v){
+    data_dt <- data_dt[,-removeIndexes_v,with=F]
+  }
+  
+  ## Return
+  return(data_dt)
+} # dupCols
+
+
+###
+### thirds #####################################################################################################################
+###
+
+thirds <- function(x_v, na.rm = T){
+  #' Thirds-based vector division
+  #' @description Instead of dividing a vector into quartiles, divide into thirds and return values at those points.
+  #' @param x_v numeric vector
+  #' @param na.rm TRUE (default) remove NAs. FALSE - don't remove. returns all NA
+  #' @value vector containing value of min, bottom 3rd, median, top 3rd, and max.
+  #' @export
+  
+  ## Check NAs
+  isNA_v <- is.na(x_v)
+  if (any(isNA_v)){
+    if (na.rm) {
+      x <- x[!isNA_v]
+    } else {
+      return(rep.int(NA,5))
+    } # fi na.rm
+  } # fi any()
+  
+  ## Sort
+  x_v <- sort(x_v)
+  
+  ## Get length
+  len_v <- length(x_v)
+  
+  ## Handle zero-length
+  if (len_v == 0){
+    rep.int(NA,5)
+  } else {
+    ## Get 1/4 division (len3_v*3 == len_v+1)
+    len3_v <- floor((len_v+2)/1.5)/2
+    ## Get divisions
+    d <- c(1, len3_v, (len_v+1)/2, len_v + 1 - len3_v, len_v)
+    ## Take mean of the two values surrounding division (if not an integer)
+    0.5 * (x_v[floor(d)] + x_v[ceiling(d)])
+  } # fi len_v == 0
+} # thirds
