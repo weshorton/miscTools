@@ -2,9 +2,9 @@
 
 ### Need to make sure all of the downloads proceded properly
 
-refFile=/home/exacloud/lustre1/SchedinLab/publicData/code/ref/compareSize.txt
+refFile=$sch/publicData/code/ref/compareSize.txt
 
-logDir=/home/exacloud/lustre1/SchedinLab/publicData/code/logs/sra
+logDir=$sch/publicData/code/logs/sra
 
 ### Do for each output file
 

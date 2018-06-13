@@ -6,7 +6,7 @@
 ### Constants ###
 #################
 
-MYAPPS="/home/exacloud/lustre1/CompBio/users/hortowe/myApps"
+MYAPPS="$REPOS/myApps"
 ESEARCH="$MYAPPS/edirect/esearch"
 EFETCH="$MYAPPS/edirect/efetch"
 

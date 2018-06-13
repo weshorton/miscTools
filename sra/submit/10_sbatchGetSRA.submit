@@ -11,7 +11,7 @@
 #SBATCH --output             getSRA_%j.out        # Standard output
 #SBATCH --error              getSRA_%j.err        # Standard error
 
-BASE=/home/exacloud/lustre1/SchedinLab/publicData/
+BASE=$sch/publicData/
 
 MYBIN=$BASE/code/10_getSRA.sh
 

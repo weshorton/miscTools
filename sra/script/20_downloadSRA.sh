@@ -6,9 +6,10 @@
 ### Constants ###
 #################
 
-ESEARCH="/home/exacloud/lustre1/CompBio/users/hortowe/myApps/edirect/esearch"
-EFETCH="/home/exacloud/lustre1/CompBio/users/hortowe/myApps/edirect/efetch"
-FASTQDUMP="/home/exacloud/lustre1/CompBio/users/hortowe/myApps/sratoolkit.2.8.2-1/bin/fastq-dump"
+MYAPPS="$REPOS/myApps"
+ESEARCH="$MYAPPS/edirect/esearch"
+EFETCH="$MYAPPS/edirect/efetch"
+FASTQDUMP="$MYAPPS/sratoolkit.2.8.2-1/bin/fastq-dump"
 
 
 #################

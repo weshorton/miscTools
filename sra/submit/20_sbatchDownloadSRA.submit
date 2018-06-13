@@ -12,7 +12,7 @@
 #SBATCH --error              downloadSRA_%A_%a.err        # Standard error
 #SBATCH --array              1-21
 
-BASE=/home/exacloud/lustre1/SchedinLab/publicData/
+BASE=$sch/publicData/
 REF=$BASE/code/ref/
 
 TODO=$REF/erNeg/er_sra_ids1.txt
