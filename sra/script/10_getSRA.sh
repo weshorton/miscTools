@@ -1,29 +1,30 @@
 #!/bin/bash
 
 ### Download data from the Sequence Read Archive (SRA) and optionally send it through STAR alignment
+### First step in downloading data from the Sequence Read Archive (SRA)
+### This tool uses the BioProject ID number for a particular dataset to grab all of the SRR*** and GSM***
+### IDs from that project, to be downloaded with FASTQDUMP later.
 
 #################
 ### Constants ###
 #################
 
-MYAPPS="$REPOS/myApps"
-ESEARCH="$MYAPPS/edirect/esearch"
-EFETCH="$MYAPPS/edirect/efetch"
+### If you don't have access to these tools, you can download them yourself here: https://www.ncbi.nlm.nih.gov/books/NBK179288/
+
+ESEARCH="$BIOCODERS/Applications/edirect/esearch"
+EFETCH="$BIOCODERS/Applications/edirect/efetch"
 
 #################
 ### Arguments ###
 #################
 
 EXP_ID=$1         # Should be a BioProject ID number, such as PRJNA251383
-RUNSRA=$2         # logical, indicating if SRA download should be run or not
-REF=$3            # path to directory for reference files
-OUT1=$4           # path to desired output directory for SRA download
-SUB=$5
+REF=$2            # path to directory for reference files
+SUB=$3            # (optional) path to file containing the desired GSM IDs 
+		  # that you would like to download (instead of the entire project)
 
 echo $EXP_ID
-echo $RUNSRA
 echo $REF
-echo $OUT1
 echo $SUB
 
 ####################
@@ -34,44 +35,26 @@ echo $SUB
 ### Get run info from query:          $EFETCH --format runinfo
 ### Extract run only:                 cut -d ',' -f 1
 ### Get the right type:               grep SRR
-### Download the files:               xargs fastq-dump --split-files
 
-if [ $RUNSRA == T ]; then
+## Update
+echo "Beginning SRA download."
 
-    ## Update
-    echo "Beginning SRA download."
+## Get IDs - this creates a comma-separated file (sraIDs.csv) with
+	## column 1: SRR* IDs (e.g. SRR1978303)
+	## column 2: GSM* IDs (e.g. GSM1660182)
+	## Note that column 1 should be unique, but it is possible for column 2 to have redundancies.
+	## This would indicate that a particular patient/animal has multiple fastq data files associated with it.
 
-    #    $ESEARCH -db sra -query $EXP_ID | $EFETCH --format runinfo | head -5 | cut -d ',' -f 1 | grep SRR | xargs fastq-dump --split-files -O $OUT1
-    ## Get IDs
-    $ESEARCH -db sra -query $EXP_ID | $EFETCH --format runinfo | cut -d ',' -f 1,30 | grep SRR > $REF/sraIDs.txt
+$ESEARCH -db sra -query $EXP_ID | $EFETCH --format runinfo | cut -d ',' -f 1,30 | grep SRR > $REF/sraIDs.csv
 
-    ## Subset for desired samples using the matching geo_ids, then cut to just get sra ids
-    if [ -z "$SUB" ]; then
-        echo "No subset"
-    else
-        echo "Subset for specific IDs"
-        grep -f $REF/$SUB/er_geo_ids.txt $REF/sraIDs.txt | cut -d ',' -f 1  > $REF/$SUB/er_sra_ids.txt
-    fi
+## Subset for desired samples using the matching geo_ids, then cut to just get sra ids
+
+if [ -z "$SUB" ]; then
+    echo "No subset"
+    cut -d ',' -f 1 $REF/sraIDs.csv > $REF/final_sraIDs.csv
+else
+    echo "Subset for specific IDs"
+    grep -f $SUB $REF/sraIDs.csv | cut -d ',' -f 1  > $REF/final_sraIDs.csv
 fi
 
 
-# ######################
-# ### STAR Alignment ###
-# ######################
-
-
-# if [ $RUNSTAR == T ]; then
-
-#     ## Capture SRA process
-#     fullProcess=`eval condor_q | grep getSRA.sh`
-
-#     ## Check if process exists or not (-z returns true if string is empty)
-#     if [ -z "$fullProcess" ]; then
-
-# 	## Update
-# 	echo "Done with SRA download. Preparing to run STAR"
-
-# 	## Run STAR for each file
-# 	for file in `ls $OUT1`; do
-	    
-    
