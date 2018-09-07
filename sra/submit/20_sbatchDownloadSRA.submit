@@ -18,18 +18,25 @@
 
 ### TODO file is a 1-column file containing SRR IDs.
 ### This sbatch script will submit 1 job for each line in that file (have to update #SBATCH --array above to be 1-nrow)
-### REF directory contains ID files
+### REF directory contains ID files (final_sraIDs.txt) that is output by 10_getSRA.sh
+
+### BASE is the path to the base project directory. Directory structure should look something like this:
+	### BASE
+	  ### BASE/ref - contains sra IDs
+          ### BASE/code - contains scripts and submits
+          ### BASE/fastq - will contain output
 
 ### PATHS
-BASE=$sch/publicData/
+BASE=/replace/this/path/
+DIR=fastq
 REF=$BASE/ref/
 TODO=$REF/final_sraIDs.txt
 
 ### Executable
-MYBIN=$BASE/code/20_downloadSRA.sh
+MYBIN=$BASE/code/script/20_downloadSRA.sh
 
 ### Get file
 FILE=`awk -v line=$SLURM_ARRAY_TASK_ID '{if (NR == line) print $0}' $TODO`
 
 ### Run
-$MYBIN $BASE $FILE
+$MYBIN $BASE/$DIR $FILE

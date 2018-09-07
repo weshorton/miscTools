@@ -1,9 +1,10 @@
 #!/bin/bash
 
-### Download data from the Sequence Read Archive (SRA) and optionally send it through STAR alignment
 ### First step in downloading data from the Sequence Read Archive (SRA)
 ### This tool uses the BioProject ID number for a particular dataset to grab all of the SRR*** and GSM***
-### IDs from that project, to be downloaded with FASTQDUMP later.
+### IDs from that project, to be downloaded with FASTERQDUMP later. The IDs are placed in a comma-sep file
+### called sraIDs.csv (described below). The final output (and input for the next script) is final_sraIDs.csv
+### and it is a single column containing only the SRR*** IDs and is optionally subset for particular IDs.
 
 #################
 ### Constants ###
@@ -19,7 +20,7 @@ EFETCH="$BIOCODERS/Applications/edirect/efetch"
 #################
 
 EXP_ID=$1         # Should be a BioProject ID number, such as PRJNA251383
-REF=$2            # path to directory for reference files
+REF=$2            # path to directory for reference files (this is where files are output)
 SUB=$3            # (optional) path to file containing the desired GSM IDs 
 		  # that you would like to download (instead of the entire project)
 

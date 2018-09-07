@@ -1,14 +1,14 @@
 #!/bin/bash
 
-### Download data from the Sequence Read Archive (SRA) and optionally send it through STAR alignment
+### Use fasterq-dump to download specific SRR*** IDs from a BioProject.
+### This script is designed to be used after exctracting a list of IDs with 10_getSRA.sh.
+### This script is submitted by the 20_sbatchDownloadSRA.submit script.
 
 #################
 ### Constants ###
 #################
 
-ESEARCH="$BIOCODERS/Applications/edirect/esearch"
-EFETCH="$BIOCODERS/Applications/edirect/efetch"
-FASTQDUMP="$BIOCODERS/Applications/sratoolkit.2.8.2-1-centos_linux64/bin/fastq-dump"
+FASTERQDUMP="$BIOCODERS/Applications/sratoolkit.2.9.2-centos_linux64/bin/fasterq-dump"
 
 #################
 ### Arguments ###
@@ -23,8 +23,8 @@ SRA_ID=$2               # Single ID of SRR file to download
 
 printf "Downloading ID: %s\n" $SRA_ID
 
-cmd="$FASTQDUMP --split-files -O $FASTQ_DIR $SRA_ID"
-
+cmd="$FASTERQDUMP $SRA_ID -O $FASTQ_DIR --progress"
+	
 echo $cmd
 eval $cmd
 

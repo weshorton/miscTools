@@ -21,15 +21,14 @@ BASE=$sch/publicData/
     ### fastqs - will hold actual fastq data
 
 ### Path to executable
-MYBIN=$BASE/code/10_getSRA.sh
+MYBIN=$BASE/code/script/10_getSRA.sh
 
 ### Arguments
 #EXP_ID=$1         # Should be a BioProject ID number, such as PRJNA251383
-#REF=$2            # path to directory for reference files
+#REF=$2            # path to directory for reference files (this is where files will be output)
 #SUB=$3            # optional path to file containing desired subset of GSM IDs
 
-
-#$MYBIN PRJNA281419 T $BASE/code/ref/ $BASE/fastqs
+### Execute
 $MYBIN PRJNA281419 \
 	$BASE/ref/ \
 	$BASE/ref/sub_GEO_IDs.txt
