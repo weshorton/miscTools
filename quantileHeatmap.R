@@ -30,6 +30,14 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   
   sort_hclust <- function(...) as.hclust(dendsort(as.dendrogram(...)))
   
+  ####################
+  ### DEPENDENCIES ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ####################
+  
+  require(RColorBrewer)
+  require(pheatmap)
+  require(viridis)
+  
   ############################
   ### HANDLE ... ARGUMENTS ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ############################
