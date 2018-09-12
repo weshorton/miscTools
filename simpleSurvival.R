@@ -19,7 +19,7 @@ library(survminer)
 library(data.table)
 library(RColorBrewer)
 library(xlsx)
-source("~/stable_repos_11_17/WesPersonal/utilityFxns.R")
+source("~/my_tool_repos/WesPersonal/utilityFxns.R")
 library(optparse)
 
 ####################
@@ -90,12 +90,12 @@ outDir_v <- args$outDir
 plot_v <- args$plot
 
 ### For testing
-# inputFile_v <- "/Users/hortowe/projs/Sushil/2018_02_26/Xena/data/counts_and_clinical/tcga_BLCA.tsv"
-# countCols_v <- "3,4,5,6,7,8"
-# sampleCol_v <- 1
-# timeCol_v <- 12
-# deathCol_v <- 11
-# altMeasure_v <- 13
+# inputFile_v <- "/Users/hortowe/projs/Sushil/2018_02_26/Xena/data/05_combined_counts_and_clinical/tcga_BLCA.tsv"
+# countCols_v <- "3,4,5,6,7,8,9,10,11"
+# sampleCol_v <- 2
+# timeCol_v <- 19
+# deathCol_v <- 14
+# altMeasure_v <- 20
 # outDir_v <- "/Users/hortowe/projs/Sushil/2018_02_26/Xena/survival/"
 # plot_v <- T
 
