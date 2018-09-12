@@ -18,7 +18,7 @@ suppressMessages(library(survival))
 suppressMessages(library(survminer))
 suppressMessages(library(data.table))
 library(svglite)
-source("~/stable_repos_11_17/WesPersonal/utilityFxns.R")
+source("~/my_tool_repos/WesPersonal/utilityFxns.R")
 suppressMessages(library(optparse))
 
 ####################
