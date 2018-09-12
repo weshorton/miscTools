@@ -24,6 +24,9 @@ splitInput <- function(combined_dt, split_v, metaCols_v, measureCols_v){
   #' @value Export a list of data.frames containing the non-NA measurements of each division specified in split_v.
   #' @export
   
+  ## NOTE (2018-06-15) I'M NOT SURE WHAT MEASURECOLS_V IS DOING. THESE COLUMNS (E.G. OUTCOMETYPE) DON'T
+  ## EXIST IN THE INPUT DATA. THEY'RE ONLY IN THE METADATA.
+  
   ## Get divisions
   divisions_v <- unique(combined_dt[[split_v]])
   
@@ -43,7 +46,7 @@ splitInput <- function(combined_dt, split_v, metaCols_v, measureCols_v){
 } # splitInput
 
 ### Convert data into ratios
-ratioInput <- function(splitData_lsdf, split_v, baseline_v = "Screen", measureCols_v) {
+ratioInput <- function(splitData_lsdf, split_v, baseline_v = "Screen", measureCols_v = "foo") {
   #' Turn data into ratios
   #' @description Turn all non-baseline values into a ratio b/w that timepoint and baseline (formula log2(timepoint / baseline))
   #' @param splitData_lsdf list of data.frames. One data.frame for each measurement point. Output of splitInput()
@@ -52,6 +55,9 @@ ratioInput <- function(splitData_lsdf, split_v, baseline_v = "Screen", measureCo
   #' @param baseline_v Element of split_v. Baseline measurement. Default is "Screen".
   #' @value list of data.frames that is one element shorter than splitData_lsdf. Values are now ratios instead of counts.
   #' @export
+  
+  ## NOTE (2018-06-15) I'M NOT SURE WHAT MEASURECOLS_V IS DOING. THESE COLUMNS (E.G. OUTCOMETYPE) DON'T
+  ## EXIST IN THE INPUT DATA. THEY'RE ONLY IN THE METADATA.
   
   ## Get divisions and remove baseline
   divisions_v <- grep(baseline_v, split_v, value = T, invert = T)
@@ -62,6 +68,8 @@ ratioInput <- function(splitData_lsdf, split_v, baseline_v = "Screen", measureCo
   
   ## Turn value_lsdf to ratios
   ratios_lsdf <- sapply(divisions_v, function(x) {
+    
+    cat(sprintf("Currently on division: %s\n", x))
     
     ## Get data
     currData_df <- values_lsdf[[x]]
@@ -75,11 +83,11 @@ ratioInput <- function(splitData_lsdf, split_v, baseline_v = "Screen", measureCo
     ## Remove them
     if (rmValue_v != ""){
       currData_df <- currData_df[grep(rmValue_v, rownames(currData_df), invert = T, value = T),]
-      print(sprintf("Removed %s patient(s) from %s because not in %s", rmValue_v, x, baseline_v))
+      cat(sprintf("Removed %s patient(s) from %s because not in %s\n\n", rmValue_v, x, baseline_v))
     }
     if (rmBaseline_v != ""){
       currBaseline_df <- baseline_df[grep(rmBaseline_v, rownames(baseline_df), invert = T, value = T),]
-      print(sprintf("Removed %s patient(s) from %s because not in %s", rmBaseline_v, baseline_v, x))
+      cat(sprintf("Removed %s patient(s) from %s because not in %s\n\n", rmBaseline_v, baseline_v, x))
     }
     
     ## Get non-measurement columns (i.e. columns to take ratios of)
