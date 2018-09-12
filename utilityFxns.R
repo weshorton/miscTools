@@ -1001,3 +1001,9 @@ kmPlot <- function(fit, model, colors_v = c("blue", "red"), labels_v = c("Low" =
 
 dir_v <- dirname(sys.frame(1)$ofile)
 source(file.path(dir_v, "quantileHeatmap.R"))
+
+###
+### text to excel ###############################################################################################################
+###
+
+source(file.path(dir_v, "textToExcel.R"))
