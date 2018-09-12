@@ -33,6 +33,10 @@ library(grid); library(gridExtra); library(gtable)
 ###   nChooseK                  Find # of unique pairwise combos         ###
 ###   dupCols                   Find duplicated columns (and remove)     ###
 ###   thirds                    Get values of min/low3rd/med/upp3rd/max  ###
+###   textToExcel               Convert dir of csv/tsv files to xlsx     ###
+###   convertDFT                Convert df to dt and vice versa          ###
+###   kmPlot                    Custom Kaplain Meier plot                ###
+###   quantileHeat              Heatmap with quantile color scale        ###
 ###                                                                      ###
 ############################################################################
 
@@ -476,6 +480,30 @@ angle_both <- theme(axis.text.x = element_text(angle = 45, hjust = 1),
                     axis.text.y = element_text(angle = 45))
 
 ###
+### Times New Roman #############################################################################################################
+###
+
+times <- my_theme +
+  theme(plot.title = element_text(family = "Times New Roman", hjust = 0.5, size = 18),
+        axis.text = element_text(family = "Times New Roman", size = 12),
+        axis.title = element_text(family = "Times New Roman", size = 14),
+        legend.text = element_text(family = "Times New Roman", size = 12),
+        legend.title = element_text(family = "Times New Roman", size = 12),
+        strip.text = element_text(family = "Times New Roman", size = 14))
+
+###
+### Big Label Times New Roman ###################################################################################################
+###
+
+bl_times <- my_theme +
+  theme(plot.title = element_text(family = "Times New Roman", hjust = 0.5, size = 20),
+        axis.text = element_text(family = "Times New Roman", size = 16),
+        axis.title = element_text(family = "Times New Roman", size = 18),
+        legend.text = element_text(family = "Times New Roman", size = 16),
+        legend.title = element_text(family = "Times New Roman", size = 18),
+        strip.text = element_text(family = "Times New Roman", size = 18))
+
+###
 ### Extract ggplot legend #######################################################################################################
 ###
 
@@ -654,7 +682,7 @@ rmNARow <- function(data_dt, cols_v, extract_v = F){
    #' @param cols_v columns to check for NA in
    #' @param extract_v logical, TRUE - output the NA rows; FALSE (default) - output the input table with NA rows removed
    #' @value data.table either containing the offending rows (extract_v == T), or the input table with those rows removed
-   #' export
+   #' @export
   
    ## Logical of if row is complete or not
    completeRows_v <- complete.cases(data_dt[,..cols_v])
@@ -678,7 +706,7 @@ simpleCap <- function(x) {
   #' Taken from 'Examples' section of ?toupper
   #' @param x vector
   #' @value same as X, but each first letter is capitalized.
-  #' export
+  #' @export
   
   s <- strsplit(x, " ")[[1]]
   paste(toupper(substring(s, 1, 1)), substring(s, 2),
@@ -690,6 +718,7 @@ simpleCap <- function(x) {
 ###
 
 ### Extract rounded p-value from anova summary results
+### THIS IS OLD! YOU SHOULD USE THE modelP FUNCTION BELOW. JUST KEEPING THIS IN CASE ANY OLD SCRIPTS USE IT.
 
 anovaP <- function(aov, round_v = T) {
   #' Extract p-value from anova summary results
@@ -697,12 +726,69 @@ anovaP <- function(aov, round_v = T) {
   #' @param aov summary.aov object created by summary(aov(y ~ x))
   #' @param round_v logical. TRUE - round p-value to 3 decimals; FALSE - do not round
   #' @value numeric vector of p-value.
-  #' export
+  #' @export
   
   aov <- aov[[1]][["Pr(>F)"]][[1]]
   aov <- ifelse(round_v, round(aov, digits = 3), aov)
   return(aov)
 } # anovaP
+
+###
+### lm P #####################################################################################################################
+###
+
+lmP <- function(lm_obj, round_v = T) {
+  #' Extract p-value from linear model results
+  #' @description Extract the p-value estimate from a linear model output object
+  #' @param lm_obj linear model object
+  #' @param round_v logical. TRUE - round p-value to 3 decimals; FALSE - do not round
+  #' @value numeric vector of p-value
+}
+
+###
+### modelP ######################################################################################################################
+###
+
+modelP <- function(model, round_v = T) {
+  #' Extract p-value from model
+  #' @description Extract the p-value estimate from either a linear model (lm) or ANOVA (aov) object.
+  #' @param model model object of class 'lm' for linear model, classes 'lm' and 'aov' for ANOVA.
+  #' @param round_v logical. TRUE - round p-value to 3 decimals; FALSE - do not round.
+  #' @value numeric vector of p-value
+  #' @export
+  
+  ## Check class
+  class_v <- class(model)
+  if (length(class_v) == 2 & class_v[1] == "aov") {
+    print("Supplied aov model.")
+    class_v <- "aov"
+  } else if (length(class_v) == 1 & class_v == "lm") {
+    print("Supplied lm model.")
+  } else {
+    print("Supplied model is not an object of class 'aov' or 'lm'.")
+  } # fi
+  
+  ## Take summary
+  summary_v <- summary(model)
+  
+  ## Get p-value
+  if (class_v == "aov") {
+    p_v <- model[[1]][["Pr(>F)"]][[1]]
+  } else {
+    temp <- summary_v$fstatistic
+    p_v <- pf(temp[1], temp[2], temp[3], lower.tail = F)
+    attributes(p_v) <- NULL
+  } # fi
+  
+  ## Round
+  p_v <- ifelse(round_v, round(p_v, digits = 3), p_v)
+  
+  ## If 0, make it < 2.2e-16
+  p_v <- ifelse(p_v == 0, p_v <- "< 2.2e-16", p_v)
+  
+  ## Output
+  return(p_v)
+}
 
 ###
 ### nChooseK ####################################################################################################################
@@ -714,7 +800,7 @@ nChooseK <- function(n_v, k_v) {
   #' @param n_v number of possible elements to create combinations
   #' @param k_v size of combinations (e.g. 3 means all unique combinations of 3 elements from n_v)
   #' @value numeric vector listing the total number of combinations
-  #' export
+  #' @export
   
   res_v <- factorial(n_v) / (factorial(k_v) * factorial(n_v - k_v))
   return(res_v)
@@ -732,7 +818,7 @@ dupCols <- function(data_dt, remove_v = T){
   #' @param data_dt input data.table with duplicated columns
   #' @param remove_v logical, TRUE - remove columns; FALSE - do not remove, just print column names to console
   #' @value data.table same as data_dt, optionally with extra columns removed.
-  #' export
+  #' @export
   
   ## Count occurrences of each column name
   colCounts_dt <- as.data.table(table(colnames(data_dt)))
@@ -762,7 +848,7 @@ dupCols <- function(data_dt, remove_v = T){
 
 
 ###
-### thirds #####################################################################################################################
+### thirds ######################################################################################################################
 ###
 
 thirds <- function(x_v, na.rm = T){
@@ -801,3 +887,117 @@ thirds <- function(x_v, na.rm = T){
     0.5 * (x_v[floor(d)] + x_v[ceiling(d)])
   } # fi len_v == 0
 } # thirds
+
+###
+### ConvertDFT ##################################################################################################################
+###
+
+convertDFT <- function(data_dft, col_v = NA, newName_v = "V1") {
+  #' Convert between data.table and data.frame
+  #' @description Change data.tables into data.frames with appropriate row.names or
+  #' data.frames into data.tables, copying over row.names
+  #' @param data_dft data in either data.table or data.frame format
+  #' @param col_v if converting from dt to df, which column to use as row.names (default is 1st column)
+  #' @param newName_v if converting from df to dt, what to name new column. (default is "V1")
+  #' @value either a data.table or data.frame (opposite class of input)
+  #' @export
+  
+  ## Get class
+  class_v <- class(data_dft)
+  
+  ## Convert data.table to data.frame
+  if ("data.table" %in% class_v){
+    
+    ## Convert
+    out_dft <- as.data.frame(data_dft)
+    
+    ## Get column for row names
+    if (is.na(col_v)) col_v <- colnames(data_dft)[1]
+    
+    ## Add row names
+    rownames(out_dft) <- data_dft[[col_v]]
+    
+    ## Remove column that provided rownames
+    whichCol_v <- which(colnames(data_dft) == col_v)
+    out_dft <- out_dft[,-1, drop = F]
+    
+  ## Convert data.frame to data.table
+  } else if (class_v %in% c("data.frame", "matrix")){
+    
+    ## Convert
+    out_dft <- as.data.table(data_dft)
+    
+    ## Add back row.names
+    out_dft[[newName_v]] <- rownames(data_dft)
+    
+    ## Change order
+    out_dft <- out_dft[ , c(ncol(out_dft), 1:(ncol(out_dft)-1)), with = F]
+  } else {
+    stop("Neither 'data.table', 'data.frame', nor 'matrix' were in the class of data_dft. Please check your input data.")
+  } # fi
+  
+  ## Return
+  return(out_dft)
+  
+} # convertDFT
+      
+###
+### kmPlot ######################################################################################################################
+###
+
+kmPlot <- function(fit, model, colors_v = c("blue", "red"), labels_v = c("Low" = "low", "High" = "up"), main_v = "KM Survival", 
+                   xlab_v = "Overall Survival", ylab_v = "Prop. Survival", max_x, leg_y = c('med' = 1, 'rec' = 0.73, 'p' = 0.5)) {
+  #' Custom Kaplan Meier plot with median lines and legends
+  #' @description Specific Kaplan Meier plot
+  #' @param fit "survfit" object created by survfit() function
+  #' @param model "survdiff" object created by survdiff() function
+  #' @param colors_v vector of colors to plot. Must be same length as number of divisions in fit
+  #' @param labels_v named vector of divisions in survival model. Names will be displayed on legend, values must match those of fit/model.
+  #' @param main_v title for plot
+  #' @param xlab_v label for X-axis. Default is "Overall Survival"
+  #' @param ylab_v label for y-axis. Default is "Prop. Survival"
+  #' @param max_x Max x-value from original data that created fit. Used for placing legends
+  #' @param leg_y named vector of legend y-axis placements. Names are 'med', 'p', and 'rec'. Legends will only be printed if they have a leg_y value.
+  #' @value plot to console of Kaplan Meier survival estimate
+  #' @export
+  
+  ## Generate base plot
+  plot(fit, col = colors_v, frame = F, lwd = 2,
+       main = main_v, xlab = xlab_v, ylab = ylab_v,
+       mark.time = T, cex.main = 2, cex.lab = 1.5, cex.axis = 1.2)
+  
+  ## Get medians and records
+  medians_v <- summary(fit)$table[,'median']; names(medians_v) <- gsub("^.*=", "", names(medians_v))
+  records_v <- summary(fit)$table[,'records']; names(records_v) <- gsub("^.*=", "", names(records_v))
+  
+  ## Add median lines
+  lines(c(0, max(medians_v)), c(0.5, 0.5), lty = "dashed")
+  mapply(function(x,y) lines(rep(x,2),c(0,0.5),col=y, lty="dashed"), medians_v, colors_v)
+  
+  ## Add median legend
+  if ('med' %in% names(leg_y)) {
+    med_leg <- sapply(names(labels_v), function(x) paste(x, medians_v[[labels_v[x] ]], sep = " = "))
+    legend(max_x, leg_y['med'], legend = med_leg, col = colors_v, title = "Med. Surv.", bty = 'n', xjust = 1, cex = 1.2)
+  } # fi
+  
+  ## Add Record legend
+  if ('rec' %in% names(leg_y)) {
+    rec_leg <- sapply(names(labels_v), function(x) paste(x, records_v[[ labels_v[x] ]], sep = " = "))
+    legend(max_x, leg_y['rec'], legend = rec_leg, col = colors_v, title = "N. Records", bty = 'n', xjust = 1, cex = 1.2)
+  } # fi
+  
+  ## Add pvalue legend
+  if ('p' %in% names(leg_y)) {
+    pval <- pchisq(model$chisq, df = 1, lower = F)
+    pv_leg <- paste0("p.val = ", round(pval, digits = 4))
+    legend(max_x, leg_y['p'], legend = pv_leg, bty = 'n', xjust = 1, cex = 1.2)
+  }
+  
+}
+
+###
+### Quantile Heat ###############################################################################################################
+###
+
+dir_v <- dirname(sys.frame(1)$ofile)
+source(file.path(dir_v, "quantileHeatmap.R"))
