@@ -1,25 +1,42 @@
 #!/bin/sh
 
-#SBATCH --partition          exacloud                # partition (queue)
-#SBATCH --nodes              1                       # number of nodes
-#SBATCH --ntasks             1                       # number of "tasks" to be allocated for the job
-#SBATCH --ntasks-per-core    1                       # Max number of "tasks" per core.
-#SBATCH --cpus-per-task      10                       # Set if you know a task requires multiple processors
-##SBATCH --mem-per-cpu        8000                    # Memory required per allocated CPU (mutually exclusive with mem)
-#SBATCH --mem                32000                  # memory pool for each node
-#SBATCH --time               0-24:00                 # time (D-HH:MM)
-#SBATCH --output             downloadSRA_%A_%a.out        # Standard output
-#SBATCH --error              downloadSRA_%A_%a.err        # Standard error
+#SBATCH --partition          exacloud                  # partition (queue)
+#SBATCH --nodes              1                         # number of nodes
+#SBATCH --ntasks             1                         # number of "tasks" to be allocated for the job
+#SBATCH --ntasks-per-core    1                         # Max number of "tasks" per core.
+#SBATCH --cpus-per-task      10                        # Set if you know a task requires multiple processors
+##SBATCH --mem-per-cpu        8000                     # Memory required per allocated CPU (mutually exclusive with mem)
+#SBATCH --mem                32000                     # memory pool for each node
+#SBATCH --time               0-24:00                   # time (D-HH:MM)
+#SBATCH --output             downloadSRA_%A_%a.out     # Standard output
+#SBATCH --error              downloadSRA_%A_%a.err     # Standard error
 #SBATCH --array              1-21
 
-BASE=$sch/publicData/
-REF=$BASE/code/ref/
+###################
+### EXPLANATION ###
+###################
 
-TODO=$REF/erNeg/er_sra_ids1.txt
-#TODO=$REF/erNeg/er_sra_ids2.txt
+### TODO file is a 1-column file containing SRR IDs.
+### This sbatch script will submit 1 job for each line in that file (have to update #SBATCH --array above to be 1-nrow)
+### REF directory contains ID files (final_sraIDs.txt) that is output by 10_getSRA.sh
 
-MYBIN=$BASE/code/20_downloadSRA.sh
+### BASE is the path to the base project directory. Directory structure should look something like this:
+	### BASE
+	  ### BASE/ref - contains sra IDs
+          ### BASE/code - contains scripts and submits
+          ### BASE/fastq - will contain output
 
+### PATHS
+BASE=/replace/this/path/
+DIR=fastq
+REF=$BASE/ref/
+TODO=$REF/final_sraIDs.txt
+
+### Executable
+MYBIN=$BASE/code/script/20_downloadSRA.sh
+
+### Get file
 FILE=`awk -v line=$SLURM_ARRAY_TASK_ID '{if (NR == line) print $0}' $TODO`
 
-$MYBIN $BASE $FILE
+### Run
+$MYBIN $BASE/$DIR $FILE

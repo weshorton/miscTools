@@ -2,8 +2,12 @@
 
 ### Need to make sure all of the downloads proceded properly
 
-refFile=$sch/publicData/code/ref/compareSize.txt
+### Preparation for this script
+  ### After running 20_downloadSRA.sh, need to move all of the .out log files to a single directory (logDir)
+  ### Need to have run 30_prepareDownloadCheck.sh to create the comparison file (refFile)
 
+### Set ref file and log dir
+refFile=$sch/publicData/code/ref/test
 logDir=$sch/publicData/code/logs/sra
 
 ### Do for each output file
@@ -28,7 +32,7 @@ for file in *.out; do
     rline=`grep $name $refFile`
 
     ## Get ref count
-    rcount=`echo $rline | awk -F ' ' '{print $2}'`
+    rcount=`echo $rline | awk -F ' ' '{print $4}'`
 
     ## Find difference
     countDiff=`expr $rcount - $count`
@@ -41,7 +45,4 @@ for file in *.out; do
 	## Write out
 	echo $name >> badTransfer.txt
     fi
-done
-
-	
-       
+done    
