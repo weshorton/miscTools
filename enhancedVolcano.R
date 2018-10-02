@@ -1,5 +1,24 @@
 ### From https://github.com/kevinblighe/EnhancedVolcano/blob/master/R/EnhancedVolcano.R
 
+### Uncomment this to assign all the standard arguments
+# xlim = c(min(toptable[,x], na.rm=TRUE),
+#          max(toptable[,x], na.rm=TRUE))
+# xlab = bquote(~Log[2]~ "fold change")
+# axisLabSize = 16
+# pLabellingCutoff = pCutoff
+# titleLabSize = 16
+# col = c("grey30", "forestgreen", "royalblue", "red2")
+# colAlpha = 0.5
+# legend = c("NS","Log2 FC","P","P & Log2 FC")
+# legendLabSize = 10
+# legendIconSize = 3.0
+# widthConnectors = 0.5
+# colConnectors = "black"
+# cutoffLineType = "longdash"
+# cutoffLineCol = "black"
+# cutoffLineWidth = 0.4
+
+
 EnhancedVolcano <- function(
   toptable,
   lab,
@@ -7,7 +26,7 @@ EnhancedVolcano <- function(
   y,
   selectLab = NULL,
   both = T, # plot both significant labels and selected labels
-  colorSelect = T, # change the color of select label points to red4
+  colorSelect = T, # change the color of select label **points** to red4
   xlim = c(min(toptable[,x], na.rm=TRUE),
            max(toptable[,x], na.rm=TRUE)),
   ylim = c(0, max(-log10(toptable[,y]), na.rm=TRUE) + 5),
@@ -67,7 +86,19 @@ EnhancedVolcano <- function(
                          levels=c("NS","FC","P","FC_P"))
   
   ### Add label column and plotting values
-  toptable$lab <- lab
+  if (length(lab) == nrow(toptable)){
+    toptable$lab <- lab
+  } else {
+    ## Get the ones that are specified in labs
+    labs <- sapply(rownames(toptable), function(x) {
+      y <- ifelse(x %in% lab, x, "")
+    })
+    toptable$lab <- labs
+    ## Also need to get the ones specified in selectLab
+    for (i in 1:length(selectLab)){
+      toptable[rownames(toptable) == selectLab[i], "lab"] <- selectLab[i]
+    }
+  }
   toptable$xvals <- toptable[,x]
   toptable$yvals <- toptable[,y]
   
