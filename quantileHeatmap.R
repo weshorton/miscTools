@@ -2,7 +2,8 @@
 ### Heatmap Function
 ###
 
-quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, heatCol_v = NA, rev_v = T, scale_v = "row", sortClust_v = T, qc_v = T, outDir_v = NA, ...) {
+quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, heatCol_v = NA, 
+                         rev_v = T, scale_v = "row", clust_v = T, sortClust_v = T, qc_v = T, outDir_v = NA, ...) {
   #' Custom Heatmap Function
   #' @description This heatmap function uses quartile scaling to distribute colors more evenly among measurements.
   #' @param data_df data.frame with counts to plot. Rows = gene/analyte; columns = patient/sample.
@@ -12,6 +13,7 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   #' @param heatCol_v Can be one of 3 things: (1) vector of color identifiers, (2) name of RColorBrewer palette, (3) name of other color fxn (e.g. inferno)
   #' @param rev_v logical. TRUE - reverse order of colors. FALSE - keep original order
   #' @param scale_v one of "row", "col", or NA. Determines whether or not to scale data, and in which direction.
+  #' @param clust_v logical. TRUE - cluster rows/columns (see sortClust_v for their output). FALSE - don't cluster.
   #' @param sortClust_v logical. TRUE - output sorted dendrograms. FALSE - output default dendrograms
   #' @param qc_v logical. TRUE - output QC plots of color mapping. FALSE - only output the final heatmap.
   #' @param outDir_v path to output directory for heatmap and qc plots (if specified). If blank, will print to stdout.
@@ -45,7 +47,7 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   extraParams_ls = list(...)
   
   ### For testing
-  extraParams_ls <- list(cellwidth = 10)
+  #extraParams_ls <- list(cellwidth = 10)
   
   ####################
   ### HANDLE COLOR ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,6 +70,7 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
     heatColors_v <- do.call(heatCol_v, list(100))
     altColors_v <- do.call(heatCol_v, list(99))
   } else {
+    heatColors_v <- heatCol_v
     altColors_v <- heatColors_v[-1]
   } # fi
   
@@ -85,12 +88,19 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   ### SCALE DATA ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ##################
   
-  scale_v <- ifelse(scale_v == "row", 1, ifelse(scale_v == "col", 2, NA))
+#  scale_v <- ifelse(scale_v == "row", 1, ifelse(scale_v == "col", 2, NA))
   
   if (!is.na(scale_v)) {
-    mean_v <- apply(data_df, scale_v, mean, na.rm = T)
-    sd_v <- apply(data_df, scale_v, sd, na.rm = T)
-    data_df <- (data_df - mean_v) / sd_v
+    if (scale_v == "row") {
+      data_df <- t(scale(t(data_df)))
+    } else if (scale_v == "col") {
+      data_df <- scale(data_df)
+    } else {
+      stop("Invalid argument for scale_v")
+    }
+    # mean_v <- apply(data_df, scale_v, mean, na.rm = T)
+    # sd_v <- apply(data_df, scale_v, sd, na.rm = T)
+    # data_df <- (data_df - mean_v) / sd_v
   } # fi
   
   ##########################
@@ -137,14 +147,16 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
     if (sortClust_v) {
       stdArgs_v$cluster_rows <- sort_row_hclust
       stdArgs_v$cluster_cols <- sort_col_hclust
-    }
+    } # fi
+    
+    if (!clust_v) {
+      stdArgs_v$cluster_rows <- F
+      stdArgs_v$cluster_cols <- F
+    } # fi
     
     ## Plot with extra arguments
     do.call(pheatmap, c(stdArgs_v, extraParams_ls))
   } # fi
-  
-  pheatmap(mat = data_df, cluster_rows = unsort_row_hclust, annotation_row = row_df,
-           annotation_colors = annCol_lsv)
   
   ###########################
   ### TEST UNIFORM BREAKS ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,10 +270,16 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
     stdArgs_v[["cluster_cols"]] <- sort_col_hclust
   }
   
+  if (!clust_v) {
+    stdArgs_v$cluster_rows <- F
+    stdArgs_v$cluster_cols <- F
+  } # fi
+  
   ## Plot with extra arguments
   do.call(pheatmap, c(stdArgs_v, extraParams_ls))
 
 } # myHeat
+
 
 # ###
 # ### Test
