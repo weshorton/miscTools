@@ -9,6 +9,7 @@ addFlag <- function(pheatmap,
   #' @param repelDegree_v value between 0 and 1 that controls space to allocate for label repel.
   #' repel.degree = 0: spread out labels over existing range of kept labels
   #' repel.degree = 1: spread out labels of full y-axis
+  #' @details Function provided by Z.Lin here https://stackoverflow.com/questions/52599180/partial-row-labels-heatmap-r
   #' @value pheatmap object
   #' @export
   
