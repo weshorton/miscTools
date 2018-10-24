@@ -369,19 +369,26 @@ mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v = NULL, ...) {
     } # fi
 
     for (i in 2:length(data_lsdt)) {
-        merge_dt <- merge(merge_dt,
-                          data_lsdt[[i]][,mget(c(mergeCol_v, keepCol_v))],
-                          by = mergeCol_v,
-                          all = all_v, sort = sort_v)
-        ## Update column names
-        if (length(keepCol_v) > 1){
-            colNames_v <- c(colNames_v, paste(names(data_lsdt)[i], keepCol_v, sep = "_"))
-        } else {
-            colNames_v <- c(colNames_v, names(data_lsdt)[i])
-        } # fi
+      
+      ## This is new (2018-10-10) - need to make new keepCol_v if the data.tables don't have same columns
+      if (!keepCol_v %in% colnames(data_lsdt[[i]])) {
+        keepCol_v <- colnames(data_lsdt[[i]])[-which(colnames(data_lsdt[[i]]) %in% mergeCol_v)]
+      } # fi
+      
+      ## Merge
+      merge_dt <- merge(merge_dt,
+                        data_lsdt[[i]][,mget(c(mergeCol_v, keepCol_v))],
+                        by = mergeCol_v,
+                        all = all_v, sort = sort_v)
+      ## Update column names
+      if (length(keepCol_v) > 1){
+          colNames_v <- c(colNames_v, paste(names(data_lsdt)[i], keepCol_v, sep = "_"))
+      } else {
+          colNames_v <- c(colNames_v, names(data_lsdt)[i])
+      } # fi
         
-        ## Rename columns
-        colnames(merge_dt) <- colNames_v
+      ## Rename columns
+      colnames(merge_dt) <- colNames_v
     } # for
     return(merge_dt)
 } # mergeDTs
