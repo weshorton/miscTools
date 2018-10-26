@@ -521,7 +521,7 @@ g_legend <- function(a.gplot){
   #' @param a.gplot a ggplot object with a legend
   #' @value a gtable object of the legend
   #' @export
-  
+    
     tmp <- ggplot_gtable(ggplot_build(a.gplot))
     leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
     legend <- tmp$grobs[[leg]]
@@ -580,7 +580,6 @@ myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
   table_grob <- gtable_add_rows(table_grob, heights = grobHeight(title_grob) + unit(5,'mm'), pos = 0)
   table_grob <- gtable_add_grob(table_grob, title_grob, 1, 1, 1, ncol(table_grob))
 }
-
 
 ###
 ### Plot Special ################################################################################################################
@@ -1034,18 +1033,18 @@ source("~/my_tool_repos/WesPersonal/quantileHeatmap.R")
 ###
 ### Mean Pos Only ###############################################################################################################
 ###
-
+  
 ### Answer to SO Post - https://stackoverflow.com/questions/52973875/is-there-a-simpler-way-to-calculate-mean-while-dropping-negative-values/52975841#52975841
-
+  
 meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegcount", meanName_v = "averagev", rename_v = T) {
   #' Calculate means of positive values
   #' @description Calculate the mean value of all positive values in all rows of a data.frame, matrix, etc.
   #' @param data - data.frame, matrix, etc. Table of values
-  #' @param refCol_v - character vector - Name of column(s) that will not be used in taking the mean. 
+  #' @param refCol_v - character vector - Name of column(s) that will not be used in taking the mean.
   #' Some sort of reference/metadata column(s). Must be before other columns.
-  #' @param calcCol_v - vector (character or numeric) - 
+  #' @param calcCol_v - vector (character or numeric) -
   #' character - Name of column(s) that will be used in taking the mean. Default is NA, which will use all columns not in refCol_v.
-  #' numeric - column indices of column(s) that will be used in taking the mean. 
+  #' numeric - column indices of column(s) that will be used in taking the mean.
   #' @param negCountName_v - character vector - name of column that will tally number of negative values in each row
   #' @param meanName_v - character vector - name of column that will contain the resulting average of all positive values in each row
   #' @param rename_v - logical - rename the calc columns by adding ".[0-9]" where [0-9] is 1 more than currently in name
@@ -1060,10 +1059,10 @@ meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegco
   } else {
     cols_v <- calcCol_v
   } # fi
-  
+
   ## Get numeric columns
   whichNum_v <- which(sapply(data, class) == "numeric")
-  
+
   ## Get result
   out_df <- as.data.frame(t(apply(data, 1, function(x) {
     whichMean_v <- which(as.numeric(x[cols_v]) >= 0)
@@ -1072,13 +1071,13 @@ meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegco
     z <- c(x, num0_v, y)
     return(z)
   })))
-  
+
   ## Add names
   colnames(out_df)[c(ncol(out_df)-1,ncol(out_df))] <- c(negCountName_v, meanName_v)
-  
+
   ## Fix numeric columns
   for (c_v in c(whichNum_v, ncol(out_df)-1, ncol(out_df))) out_df[,c_v] <- as.numeric(as.character(out_df[,c_v]))
-  
+
   ## Fix calc names
   colNames_v <- colnames(out_df)[cols_v]
   if (rename_v) {
@@ -1088,9 +1087,9 @@ meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegco
                   paste0(y, ".1"),
                   paste0(y[1], ".", (as.numeric(y[2])+1)))
       return(z)})
-  } # fi
+    } # fi
   colnames(out_df)[cols_v] <- colNames_v
-  
+
   ## Return
   return(out_df)
 } # meanPosOnly
