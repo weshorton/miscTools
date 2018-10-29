@@ -37,13 +37,13 @@ addFlag <- function(pheatmap,
                       n = nGrp_v)
   
   ## Create new grob for the flag line segments
-  newFlag_grob <- segmentsGrob(x0 = label_grob$x,
-                               x1 = label_grob$x + unit(0.15, "npc"),
+  newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.1, "npc"),
+                               x1 = label_grob$x + unit(0.25, "npc"),
                                y0 = label_grob$y[label_grob$label != ""],
                                y1 = newY_v)
   
   ## Shift selected labels to the right to make room for line segments
-  label_grob$x <- label_grob$x + unit(0.1, "npc")
+  label_grob$x <- label_grob$x + unit(0.3, "npc")
   
   ## Change y positions of selected labels
   label_grob$y[label_grob$label != ""] <- newY_v
