@@ -25,6 +25,7 @@ EnhancedVolcano <- function(
   x,
   y,
   selectLab = NULL,
+  plotLabels = NA,
   both = T, # plot both significant labels and selected labels
   colorSelect = T, # change the color of select label **points** to red4
   xlim = c(min(toptable[,x], na.rm=TRUE),
@@ -204,6 +205,14 @@ EnhancedVolcano <- function(
                         colour=cutoffLineCol,
                         size=cutoffLineWidth)
   
+  ## Add labels for each type
+  if (!is.na(plotLabels[1])) {
+    plot <- plot + 
+      annotate("text", label = plotLabels[1], x = xlim[1], y = ylim[1], fontface = "bold") +
+      annotate("text", label = plotLabels[2], x = xlim[2], y = ylim[1], fontface = "bold")
+  }
+  
+  ## Add color for specified gene(s)
   if (colorSelect) {
     subSubTopTable <- subTopTable[subTopTable$Color == "#8B0000",]
     plot <- plot + ggplot2::geom_point(data = subSubTopTable,
