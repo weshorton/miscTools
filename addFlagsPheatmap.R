@@ -37,7 +37,7 @@ addFlag <- function(pheatmap,
                       n = nGrp_v)
   
   ## Create new grob for the flag line segments
-  newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.1, "npc"),
+  newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.05, "npc"),
                                x1 = label_grob$x + unit(0.25, "npc"),
                                y0 = label_grob$y[label_grob$label != ""],
                                y1 = newY_v)
