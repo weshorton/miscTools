@@ -36,6 +36,7 @@ library(grid); library(gridExtra); library(gtable)
 ###   convertDFT                Convert df to dt and vice versa          ###
 ###   kmPlot                    Custom Kaplain Meier plot                ###
 ###   quantileHeat              Heatmap with quantile color scale        ###
+###   plotColor                 Plot colors and their labels             ###
 ###                                                                      ###
 ############################################################################
 
@@ -568,7 +569,7 @@ myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
   #' @description Creates table grob in format that is most common for my usage.
   #' @param data_dt Data.table that the grob will be made out of
   #' @param title_v Title for display
-  #' @param fontsize_v Fontsize for title. Default is 14 (goes will with my_theme)
+  #' @param fontsize_v Fontsize for title. Default is 14 (goes well with my_theme)
   #' @value gtable object
   #' @export
   
@@ -578,7 +579,7 @@ myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
   title_grob <- textGrob(title_v, gp = gpar(fontsize = fontsize_v))
   ## Add title
   table_grob <- gtable_add_rows(table_grob, heights = grobHeight(title_grob) + unit(5,'mm'), pos = 0)
-  table_grob <- gtable_add_grob(table_grob, title_grob, 1, 1, 1, ncol(table_grob))
+  table_grob <- gtable_add_grob(table_grob, title_grob, 1, 1, 1, ncol(table_grob), clip = "off")
 }
 
 ###
@@ -1093,3 +1094,44 @@ meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegco
   ## Return
   return(out_df)
 } # meanPosOnly
+
+###
+### Plot Color ##################################################################################################################
+###
+
+plotColor <- function(color_v, title_v = NULL, save_v = F, pch_v = 15, cex_v = 3) {
+  #' Plot Color
+  #' @description Plot vector of colors and their labels in order to preview them for later use
+  #' @param color_v - character vector of color names, hex codes, etc. to be plotted. If named, the names will be plotted as well.
+  #' @param title_v - optional title for plot. Default is NULL
+  #' @param save_v - logical. 
+  #' F - print to console without saving; 
+  #' T - save file to working directory. File name will be title_v with spaces changed to underscore. If title_v is NULL, title is 'colors.pdf'
+  #' @param pch_v - standard graphical parameter controlling point type. Default is 15 (square). see ?pch for list of options
+  #' @param cex_v - standard graphical parameter controlling point size. Default is 3.
+  #' @export
+  
+  ### Get file name
+  if (is.null(title_v)) {
+    file_v <- file.path(getwd(), "colors.pdf")
+    title_v <- ''
+  } else {
+    file_v <- file.path(getwd(), paste0(gsub(" ", "_", title_v), ".pdf"))
+  } # fi
+  
+  ### Open device
+  if (save_v) pdf(file = file_v)
+  
+  ### Plot colors
+  n_v <- length(color_v)
+  plot(1:n_v, cex = cex_v, pch = pch_v, col = color_v, xlim = c(0, n_v+1), ylim = c(0, n_v+1),
+       xlab = '', ylab = '', main = title_v)
+  
+  ### Add names
+  if (!is.null(color_v)) {
+    text(1:n_v, names(color_v), pos = 1, offset = .75, xpd = NA)
+  } # fi
+  
+  ### Close device
+  if (save_v) dev.off()
+} # plotColor
