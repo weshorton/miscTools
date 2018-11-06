@@ -27,7 +27,10 @@ plotExploratory <- function(dir_v,            # Path to output directory
     shapes_v <- shapes_v[1:nrow(nShapes_v)]; names(shapes_v) <- nShapes_v$V1
     ### Map
     pch_v <- shapes_v[match(meta_df[[shape_v]], names(shapes_v))]
-  } else {  
+  } else {
+    pch_v <- 20
+  } # fi
+  
   ### Plot boxplots
   if (plot_v) pdf(file = file.path(dir_v, paste(name_v, type_v, "RLE.pdf", sep = "_")))
   plotRLE(data, outline = F, col = colors_v,
