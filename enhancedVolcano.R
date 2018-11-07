@@ -103,7 +103,7 @@ EnhancedVolcano <- function(
   toptable$xvals <- toptable[,x]
   toptable$yvals <- toptable[,y]
   
-  # ### Add separate color for specified labels
+  # ### Add separate color for specified labels (this is added below now instead, I believe)
   # ### Also turn significance groupings into factor
   # if (colorSelect) {
   #   toptable$Sig[toptable$lab %in% selectLab] <- "S"
@@ -141,9 +141,13 @@ EnhancedVolcano <- function(
   subTopTable <- subset(toptable, toptable[,y] < pLabellingCutoff & abs(toptable[,x]) > FCcutoff)
   subTopTable <- rbind(subTopTable, toptable[toptable$lab %in% selectLab,])
   subTopTable <- subTopTable[subTopTable$lab != "",]
-  ## Add colors
-  subTopTable$Color <- "black"
-  subTopTable$Color[subTopTable$lab %in% selectLab] <- "#8B0000"
+  ## Add colors (only works if there is something there!)
+  if (nrow(subTopTable) > 0) {
+    subTopTable$Color <- "black"
+    subTopTable$Color[subTopTable$lab %in% selectLab] <- "#8B0000"
+  } else {
+    subTopTable$Color <- character()
+  }
 
   ## Begin plot
   plot <- ggplot2::ggplot(toptable,
@@ -208,8 +212,8 @@ EnhancedVolcano <- function(
   ## Add labels for each type
   if (!is.na(plotLabels[1])) {
     plot <- plot + 
-      annotate("text", label = plotLabels[1], x = xlim[1], y = ylim[1], fontface = "bold") +
-      annotate("text", label = plotLabels[2], x = xlim[2], y = ylim[1], fontface = "bold")
+      annotate("text", label = plotLabels[1], x = xlim[1]*.98, y = ylim[1], fontface = "bold") +
+      annotate("text", label = plotLabels[2], x = xlim[2]*.98, y = ylim[1], fontface = "bold")
   }
   
   ## Add color for specified gene(s)
