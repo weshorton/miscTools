@@ -1,9 +1,7 @@
 ### Function to add flag
 
 #### TO DO!!!!
-#### LINE SEGMENTS DON'T LINE UP PERFECTLY WITH THE TEXT - I think I need the unit addition in x1 of newFlag_grob to be less than the unit add in label_grob$x
 #### STILL NEED TO CHECK OUT THE GROUPING ARGUMENTS. NGRP_V = 1 AND NGRP_V = 2 appear to be the same....
-
 
 addFlag <- function(pheatmap,
                     labels_v,
@@ -30,30 +28,36 @@ addFlag <- function(pheatmap,
   ## Replace all labels not found in labels_v with ''
   label_grob$label <- ifelse(label_grob$label %in% labels_v, label_grob$label, "")
   
-  ## Calculate new y positions
-  newY_v <- repelledY(d = label_grob$y,
-                      d.select = label_grob$label != "",
-                      k = repelDegree_v,
-                      n = nGrp_v)
+  ## If there are more than 40 rows, space labels out by adding flags
+  if (length(label_grob$label) > 40) {
+    
+    ## Calculate new y positions
+    newY_v <- repelledY(d = label_grob$y,
+                        d.select = label_grob$label != "",
+                        k = repelDegree_v,
+                        n = nGrp_v)
+    
+    ## Create new grob for the flag line segments
+    newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.05, "npc"),
+                                 x1 = label_grob$x + unit(0.25, "npc"),
+                                 y0 = label_grob$y[label_grob$label != ""],
+                                 y1 = newY_v)
+    
+    ## Shift selected labels to the right to make room for line segments
+    label_grob$x <- label_grob$x + unit(0.3, "npc")
+    
+    ## Change y positions of selected labels
+    label_grob$y[label_grob$label != ""] <- newY_v
+    
+    ## Add flag line segment grob to heatmap
+    heat_gtable <- gtable::gtable_add_grob(x = heat_gtable,
+                                           grobs = newFlag_grob,
+                                           t = 4, l = 4)
+  } # fi
   
-  ## Create new grob for the flag line segments
-  newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.05, "npc"),
-                               x1 = label_grob$x + unit(0.25, "npc"),
-                               y0 = label_grob$y[label_grob$label != ""],
-                               y1 = newY_v)
-  
-  ## Shift selected labels to the right to make room for line segments
-  label_grob$x <- label_grob$x + unit(0.3, "npc")
-  
-  ## Change y positions of selected labels
-  label_grob$y[label_grob$label != ""] <- newY_v
-  
-  ## Add flag line segment grob to heatmap
-  heat_gtable <- gtable::gtable_add_grob(x = heat_gtable,
-                                         grobs = newFlag_grob,
-                                         t = 4, l = 4)
-  
-  ## Replace label positions
+  ## Replace label grob with
+    ## nrow(heatmap) > 40: selected labels only, spaced evenly and with flags added
+    ## nrow(heatmap) <= 40: selected labels only, with same y positioning
   heat_gtable$grobs[[which(heat_gtable$layout$name == "row_names")]] <- label_grob
   
   ## plot result
