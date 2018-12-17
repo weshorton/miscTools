@@ -3,7 +3,8 @@
 ###
 
 quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, heatCol_v = NA, 
-                         rev_v = T, scale_v = "row", colClust_v = T, rowClust_v = T, sortClust_v = T, qc_v = T, outDir_v = NA, ...) {
+                         rev_v = T, scale_v = "row", colClust_v = T, rowClust_v = T, sortClust_v = T, 
+                         qc_v = T, outDir_v = NA, outPrefix_v = NA, ...) {
   #' Custom Heatmap Function
   #' @description This heatmap function uses quartile scaling to distribute colors more evenly among measurements.
   #' @param data_df data.frame with counts to plot. Rows = gene/analyte; columns = patient/sample.
@@ -18,6 +19,7 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   #' @param sortClust_v logical. TRUE - output sorted dendrograms. FALSE - output default dendrograms
   #' @param qc_v logical. TRUE - output QC plots of color mapping. FALSE - only output the final heatmap.
   #' @param outDir_v path to output directory for heatmap and qc plots (if specified). If blank, will print to stdout.
+  #' @param outName_v prefix for output files. If not specified, will be blank.
   #' @param ... other arguments passed to pheatmap, such as title, cellwidth, etc.
   #' @value 
   #' @export
@@ -40,6 +42,7 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   require(RColorBrewer)
   require(pheatmap)
   require(viridis)
+  require(dendsort)
   
   ############################
   ### HANDLE ... ARGUMENTS ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,9 +123,12 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   clust_ls <- list("Unsorted Columns" = unsort_col_hclust, "Sorted Columns" = sort_col_hclust,
                    "Unsorted Rows" = unsort_row_hclust, "Sorted Rows" = sort_row_hclust)
   
+  ### Name
+  dendrName_v <- ifelse(is.na(outPrefix_v), "dendrograms.pdf", paste0(outPrefix_v, "_dendrograms.pdf"))
+  
   ### Plot
   if (qc_v) {
-    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, "dendrograms.pdf"))
+    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, dendrName_v))
     sapply(names(clust_ls), function(x) plot(clust_ls[[x]], main = x, xlab = "", sub = ""))
     if (!is.na(outDir_v)) graphics.off()
   } # fi
@@ -133,7 +139,8 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   
   if (qc_v) {
     ## Get file name
-    fileName_v <- ifelse(is.na(outDir_v), NA, file.path(outDir_v, "initialHeat.pdf"))
+    initialName_v <- ifelse(is.na(outPrefix_v), "initialHeat.pdf", paste0(outPrefix_v, "_initialHeat.pdf"))
+    fileName_v <- ifelse(is.na(outDir_v), NA, file.path(outDir_v, initialName_v))
     
     ## Get standard arguments
     stdArgs_v <- list(mat               = data_df,
@@ -197,7 +204,8 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
     labs(y = "Data Points", x = "Breaks", title = "Uniform Breaks - Number of Data Points per Color")
   
   if (qc_v) {
-    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, "uniformBreaks.pdf"))
+    breaksName_v <- ifelse(is.na(outPrefix_v), "uniformBreaks.pdf", paste0(outPrefix_v, "_uniformBreaks.pdf"))
+    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, breaksName_v))
     print(orig_density_gg)
     print(orig_color_density_gg)
     print(orig_pointsPer_gg)
@@ -242,7 +250,8 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
     labs(y = "Data Points", x = "Breaks", title = "Quantile Breaks - Number of Data Points per Color")
   
   if (qc_v) {
-    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, "quantileBreaks.pdf"))
+    quantileBreaksName_v <- ifelse(is.na(outPrefix_v), "quantileBreaks.pdf", paste0(outPrefix_v, "_quantileBreaks.pdf"))
+    if (!is.na(outDir_v)) pdf(file = file.path(outDir_v, quantileBreaksName_v))
     print(quantile_color_density_gg)
     print(quantile_pointsPer_gg)
     if (!is.na(outDir_v)) graphics.off()
@@ -253,7 +262,8 @@ quantileHeat <- function(data_df, col_df = NA, row_df = NA, annCol_lsv = NA, hea
   ########################
   
   ## Get file name
-  fileName_v <- ifelse(is.na(outDir_v), NA, file.path(outDir_v, "quantileHeat.pdf"))
+  quantileHeatName_v <- ifelse(is.na(outPrefix_v), "quantileHeat.pdf", paste0(outPrefix_v, "_quantileHeat.pdf"))
+  fileName_v <- ifelse(is.na(outDir_v), NA, file.path(outDir_v, quantileHeatName_v))
     
   ## Get standard arguments
   stdArgs_v <- list(mat               = data_df,
