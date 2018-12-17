@@ -5,12 +5,14 @@
 
 addFlag <- function(pheatmap,
                     labels_v,
+                    offset_v = 0.3,
                     repelDegree_v,
                     nGrp_v = 1) {
   #' Add special labels to pheatmap
   #' @description Add labels with flags to select rows of a heatmap
   #' @param pheatmap pheatmap object
   #' @param labels_v vector of labels to include
+  #' @param offset_v numeric vector indicating how much to offset labels to the left (Default is 0.3)
   #' @param repelDegree_v value between 0 and 1 that controls space to allocate for label repel.
   #' repel.degree = 0: spread out labels over existing range of kept labels
   #' repel.degree = 1: spread out labels of full y-axis
@@ -39,12 +41,12 @@ addFlag <- function(pheatmap,
     
     ## Create new grob for the flag line segments
     newFlag_grob <- segmentsGrob(x0 = label_grob$x - unit(0.05, "npc"),
-                                 x1 = label_grob$x + unit(0.25, "npc"),
+                                 x1 = label_grob$x + unit((offset_v*.85), "npc"),
                                  y0 = label_grob$y[label_grob$label != ""],
                                  y1 = newY_v)
     
     ## Shift selected labels to the right to make room for line segments
-    label_grob$x <- label_grob$x + unit(0.3, "npc")
+    label_grob$x <- label_grob$x + unit(offset_v, "npc")
     
     ## Change y positions of selected labels
     label_grob$y[label_grob$label != ""] <- newY_v
