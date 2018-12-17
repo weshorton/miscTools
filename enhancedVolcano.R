@@ -17,6 +17,7 @@
 # cutoffLineType = "longdash"
 # cutoffLineCol = "black"
 # cutoffLineWidth = 0.4
+# selectLab = NULL # watch this - often assigned in code
 
 
 EnhancedVolcano <- function(
@@ -137,10 +138,11 @@ EnhancedVolcano <- function(
     toptable$lab <- names.new
   }
   
-  ## Subset data, only used if !is.null(selectLab)
+  ## Subset data, only used if !is.null(selectLab) - need to figure this out...it IS used if is.null(selectLab)
   subTopTable <- subset(toptable, toptable[,y] < pLabellingCutoff & abs(toptable[,x]) > FCcutoff)
   subTopTable <- rbind(subTopTable, toptable[toptable$lab %in% selectLab,])
   subTopTable <- subTopTable[subTopTable$lab != "",]
+  
   ## Add colors (only works if there is something there!)
   if (nrow(subTopTable) > 0) {
     subTopTable$Color <- "black"
@@ -211,9 +213,14 @@ EnhancedVolcano <- function(
   
   ## Add labels for each type
   if (!is.na(plotLabels[1])) {
+    ## Determine limits
+    lenPlotLabels_v <- nchar(plotLabels)
+    limFactors_v <- sapply(lenPlotLabels_v, function(x) ifelse(x > 10, 0.85, 0.98))
+    
+    ## Add
     plot <- plot + 
-      annotate("text", label = plotLabels[1], x = xlim[1]*.98, y = ylim[1], fontface = "bold") +
-      annotate("text", label = plotLabels[2], x = xlim[2]*.98, y = ylim[1], fontface = "bold")
+      annotate("text", label = plotLabels[1], x = xlim[1]*limFactors_v[1], y = ylim[1], fontface = "bold") +
+      annotate("text", label = plotLabels[2], x = xlim[2]*limFactors_v[2], y = ylim[1], fontface = "bold")
   }
   
   ## Add color for specified gene(s)
