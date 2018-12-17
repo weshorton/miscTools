@@ -454,6 +454,8 @@ naTo0 <- function(data_dt, cols_v){
 ### Standard ggplot theme #######################################################################################################
 ###
 
+# done
+
 my_theme <- theme_classic() +
     theme(plot.title = element_text(hjust = 0.5, size = 18),
           axis.text = element_text(size = 12),
@@ -464,6 +466,8 @@ my_theme <- theme_classic() +
 ###
 ### Big Label  ggplot theme #####################################################################################################
 ###
+
+# done
 
 big_label <- theme_classic() +
     theme(plot.title = element_text(hjust = 0.5, size = 20),
@@ -477,6 +481,8 @@ big_label <- theme_classic() +
 ### Angle Text theme ############################################################################################################
 ###
 
+# done
+
 angle_x <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
 angle_y <- theme(axis.text.y = element_text(angle = 45))
 angle_both <- theme(axis.text.x = element_text(angle = 45, hjust = 1),
@@ -485,6 +491,8 @@ angle_both <- theme(axis.text.x = element_text(angle = 45, hjust = 1),
 ###
 ### Times New Roman #############################################################################################################
 ###
+
+# done
 
 times <- my_theme +
   theme(plot.title = element_text(family = "Times New Roman", hjust = 0.5, size = 18),
@@ -498,6 +506,8 @@ times <- my_theme +
 ### Big Label Times New Roman ###################################################################################################
 ###
 
+# done
+
 bl_times <- my_theme +
   theme(plot.title = element_text(family = "Times New Roman", hjust = 0.5, size = 20),
         axis.text = element_text(family = "Times New Roman", size = 16),
@@ -509,6 +519,8 @@ bl_times <- my_theme +
 ###
 ### Extract ggplot legend #######################################################################################################
 ###
+
+# done
 
 ### Taken from stack overflow...can't remember link
 
@@ -528,6 +540,8 @@ g_legend <- function(a.gplot){
 ### Special head ################################################################################################################
 ###
 
+# done
+
 mhead <- function(data_df, n = 5){
   #' Special head for table-like objects
   #' @description Show first n rows and columns of data.table/data.frame/matrix. Good for tables with many columns
@@ -542,6 +556,8 @@ mhead <- function(data_df, n = 5){
 ###
 ### Notice ######################################################################################################################
 ###
+
+# done
 
 notice <- function(statement_v) {
   #' Print easy-to-find statement
@@ -559,6 +575,8 @@ notice <- function(statement_v) {
 ###
 ### Table Grob ##################################################################################################################
 ###
+
+# done
 
 myTableGrob <- function(data_dt, title_v, fontsize_v = 14){
   #' Create custom table grob with title
@@ -636,6 +654,8 @@ plotSpecial <- function(grobs_ls, loc_lsv = list("vpPlot" = c(width = 0.65, heig
 ### Move Logs ###################################################################################################################
 ###
 
+# done
+
 mvFiles <- function(origDir_v, newDir_v, pattern_v = "*\\.log"){
   #' Move a batch of files to a new directory
   #' @description Originally developed to move venn diagram log output. Can be used to move any unique set of files to new directory.
@@ -662,6 +682,8 @@ mvFiles <- function(origDir_v, newDir_v, pattern_v = "*\\.log"){
 ### Split Comma #################################################################################################################
 ###
 
+# done
+
 splitComma <- function(string_v){
     #' Split a string along the commas in the string
     #' @description Just a concise way to split a string on the commas. Returning a vector of strings instead.
@@ -676,6 +698,8 @@ splitComma <- function(string_v){
 ###
 ### Rm NA Row ###################################################################################################################
 ###
+
+# done
 
 rmNARow <- function(data_dt, cols_v, extract_v = F){
    #' Remove rows that have NA in certain columns
@@ -701,6 +725,8 @@ rmNARow <- function(data_dt, cols_v, extract_v = F){
 ###
 ### Simple Cap ##################################################################################################################
 ###
+
+# done
 
 simpleCap <- function(x, lowerCaps_v = T) {
   #' Capitalize first letter of each word
@@ -744,20 +770,10 @@ anovaP <- function(aov, round_v = T) {
 } # anovaP
 
 ###
-### lm P #####################################################################################################################
-###
-
-lmP <- function(lm_obj, round_v = T) {
-  #' Extract p-value from linear model results
-  #' @description Extract the p-value estimate from a linear model output object
-  #' @param lm_obj linear model object
-  #' @param round_v logical. TRUE - round p-value to 3 decimals; FALSE - do not round
-  #' @value numeric vector of p-value
-}
-
-###
 ### modelP ######################################################################################################################
 ###
+
+# done
 
 modelP <- function(model, round_v = T) {
   #' Extract p-value from model
@@ -804,6 +820,8 @@ modelP <- function(model, round_v = T) {
 ### nChooseK ####################################################################################################################
 ###
 
+# done
+
 nChooseK <- function(n_v, k_v) {
   #' n Choose k
   #' @description Given 'n' elements and combinations of size 'k', find number of unique combinations.
@@ -820,6 +838,8 @@ nChooseK <- function(n_v, k_v) {
 ###
 ### dupCols #####################################################################################################################
 ###
+
+# done
 
 dupCols <- function(data_dt, remove_v = T){
   #' Duplicated Columns
@@ -861,6 +881,8 @@ dupCols <- function(data_dt, remove_v = T){
 ### thirds ######################################################################################################################
 ###
 
+# done
+
 thirds <- function(x_v, na.rm = T){
   #' Thirds-based vector division
   #' @description Instead of dividing a vector into quartiles, divide into thirds and return values at those points.
@@ -901,6 +923,8 @@ thirds <- function(x_v, na.rm = T){
 ###
 ### ConvertDFT ##################################################################################################################
 ###
+
+# done
 
 convertDFT <- function(data_dft, col_v = NA, newName_v = "V1") {
   #' Convert between data.table and data.frame
@@ -1103,6 +1127,8 @@ meanPosOnly <- function(data, refCol_v, calcCol_v = NA, negCountName_v = "tnegco
 ### Plot Color ##################################################################################################################
 ###
 
+# done
+
 plotColor <- function(color_v, title_v = NULL, save_v = F, pch_v = 15, cex_v = 3) {
   #' Plot Color
   #' @description Plot vector of colors and their labels in order to preview them for later use
@@ -1144,6 +1170,8 @@ plotColor <- function(color_v, title_v = NULL, save_v = F, pch_v = 15, cex_v = 3
 ### Read All Excel ##############################################################################################################
 ###
 
+# done
+
 readAllExcel <- function(file_v) {
   #' Read All Excel
   #' @description Read in all of the sheets in an excel workbook as a list of data.tables
@@ -1170,6 +1198,8 @@ readAllExcel <- function(file_v) {
 ###
 ### plotDensity ###################################################################################
 ###
+
+# done
 
 plotDensity <- function(density_ls, colors_ls, main_v, x_v, names_v = NULL, lwd_v = 2) {
   #' Plot Densities
