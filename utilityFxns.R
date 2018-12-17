@@ -26,23 +26,12 @@ library(grid); library(gridExtra); library(gtable)
 ###   myTableGrob               custom table_grob                        ###
 ###   plotSpecial               plot gplot with table grobs              ###
 ###   mvFiles                   Move batch of files to new dir           ###
-###   splitComma                Split character on the commas            ###
-###   rmNARow                   Remove rows with NA in specified col     ###
-###   simpleCap                 Capitalize 1st letter of each word       ###
-###   anovaP                    Get p-value from ANOVA summary           ###
-###   nChooseK                  Find # of unique pairwise combos         ###
-###   dupCols                   Find duplicated columns (and remove)     ###
-###   thirds                    Get values of min/low3rd/med/upp3rd/max  ###
-###   convertDFT                Convert df to dt and vice versa          ###
-###   kmPlot                    Custom Kaplain Meier plot                ###
-###   quantileHeat              Heatmap with quantile color scale        ###
-###   plotColor                 Plot colors and their labels             ###
-###                                                                      ###
-############################################################################
 
 ###
 ### makeDir ##################################################################################################################
 ###
+
+# done
 
 mkdir <- function(base_dir_v, 
                   new_dir_v){
@@ -147,6 +136,8 @@ lcat <- function(..., file_v = logFile_v){
 ### listToDataTable ########################################################################################################
 ###
 
+# done
+
 # Transform a list of vectors of different lengths into a data.table
 # Pad shorter vectors with NA's
 listToDataTable <- function(input_lsv){
@@ -177,17 +168,18 @@ listToDataTable <- function(input_lsv){
 ###
 
 # Take a matrix and conver to data.table, while taking the rowNames and making them the 1st column of data.table
+# This is now done by convertDFT
 
-matToDataTable <- function(inputData_mat, colName_v){
-  # Convert
-  outputData_dt <- as.data.table(inputData_mat)
-  # Add rownames as column
-  outputData_dt[[colName_v]] <- rownames(inputData_mat)
-  # Reorder columns
-  outputData_dt <- outputData_dt[,c(ncol(outputData_dt), (1:(ncol(outputData_dt)-1))), with = F]
-  # return
-  return(outputData_dt)
-} # matToDataTable
+# matToDataTable <- function(inputData_mat, colName_v){
+#   # Convert
+#   outputData_dt <- as.data.table(inputData_mat)
+#   # Add rownames as column
+#   outputData_dt[[colName_v]] <- rownames(inputData_mat)
+#   # Reorder columns
+#   outputData_dt <- outputData_dt[,c(ncol(outputData_dt), (1:(ncol(outputData_dt)-1))), with = F]
+#   # return
+#   return(outputData_dt)
+# } # matToDataTable
 
 
 ###
@@ -207,6 +199,8 @@ rd_to_markdown <- function(rd) {
 ###
 ### returnSessionInfo #########################################################################################################
 ###
+
+# done
 
 returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = NULL){
     #' Output session information
@@ -264,8 +258,6 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = N
         file_conn <- file(file_v, "a")
         write(c("\nGit repo commits:\n", capture.output(git_hashes_df)), file_conn, append = T)
         file_conn <- file(file_v, "a")
-        write(c("\nArguments Passed:\n", capture.output(args_lsv)), file_conn, append = T)
-        close(file_conn)
     } # fi
 
     ## Close connections
@@ -277,6 +269,8 @@ returnSessionInfo <- function(out_dir_v = NULL, load_dirs_v = NULL, args_lsv = N
 ###
 ### splitChar #################################################################################################################
 ###
+
+# done
 
 splitChar <- function(vector_v){
     #' Split character string
@@ -297,31 +291,29 @@ splitChar <- function(vector_v){
 
 ### Taken from Stack Overflow - https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
 
-detachAllPackages <- function() {
-    #' Clear loaded packages
-    #' @description Clear all loaded packages (excluding base). Useful for determining if a script has the appropriate packages loaded
-    #' @value None
-    #' @export
-
-    ## Define basic packages to ignore
-    basePackages_v <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
-
-    ## Extract attached packages from package/object list
-    allPackages_v <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
-
-    ## Remove base packages
-    removePackages_v <- setdiff(allPackages_v, basePackages_v)
-
-    if (length(removePackages_v) > 0){
-        for (package in removePackages_v) {
-            detach(package, character.only=TRUE)
-        } # for
-    } # fi
-} # detachAllPackages
+#' detachAllPackages <- function() {
+#'     #' Clear loaded packages
+#'     #' @description Clear all loaded packages (excluding base). Useful for determining if a script has the appropriate packages loaded
+#'     #' @value None
+#'     #' @export
+#' 
+#'     ## Define basic packages to ignore
+#'     basePackages_v <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+#' 
+#'     ## Extract attached packages from package/object list
+#'     allPackages_v <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+#' 
+#'     ## Remove base packages
+#'             detach(package, character.only=TRUE)
+#'         } # for
+#'     } # fi
+#' } # detachAllPackages
 
 ###
 ### Merge Multiple Data.Tables ##########################################################################################################
 ###
+
+# done
 
 mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v = NULL, ...) {
     #' Merge many data.tables together
@@ -399,6 +391,8 @@ mergeDTs <- function(data_lsdt, mergeCol_v, keepCol_v = NULL, ...) {
 ### Geometric Mean ##########################################################################################################
 ###
 
+# done
+
 geomMean <- function(counts_v) {
   #' Find geometric mean of vector of values
   #' @param counts_v numeric vector of values
@@ -434,6 +428,8 @@ draw_colnames_45 <- function (coln, gaps, ...) {
 ###
 ### NA to O Data.table ##########################################################################################################
 ###
+
+# done
 
 naTo0 <- function(data_dt, cols_v){
   #' Convert NA's in a data.table to 0
@@ -706,17 +702,25 @@ rmNARow <- function(data_dt, cols_v, extract_v = F){
 ### Simple Cap ##################################################################################################################
 ###
 
-simpleCap <- function(x) {
+simpleCap <- function(x, lowerCaps_v = T) {
   #' Capitalize first letter of each word
   #' @description given multi-word vector, capitalize the first letter of each word.
   #' Taken from 'Examples' section of ?toupper
   #' @param x vector
+  #' @param lowerCaps_v boolean indicating if capitalized letters (that are not the first letter in each word)
+  #' should be left capitalized or changed to lower case.
   #' @value same as X, but each first letter is capitalized.
   #' @export
   
   s <- strsplit(x, " ")[[1]]
-  paste(toupper(substring(s, 1, 1)), substring(s, 2),
-        sep = "", collapse = " ")
+  if (lowerCaps_v) {
+    paste(toupper(base::substring(s, 1, 1)), tolower(base::substring(s, 2)),
+          sep = "", collapse = " ")
+  } else {
+    paste(toupper(base::substring(s, 1, 1)), base::substring(s, 2),
+          sep = "", collapse = " ")
+  }
+  
 } # simpleCap
 
 ###
@@ -1135,3 +1139,89 @@ plotColor <- function(color_v, title_v = NULL, save_v = F, pch_v = 15, cex_v = 3
   ### Close device
   if (save_v) dev.off()
 } # plotColor
+
+###
+### Read All Excel ##############################################################################################################
+###
+
+readAllExcel <- function(file_v) {
+  #' Read All Excel
+  #' @description Read in all of the sheets in an excel workbook as a list of data.tables
+  #' @param file_v path to excel file. Can be '.xlsx' or '.xls'
+  #' @return list of data.tables
+  #' @export
+  
+  ## Get sheets
+  sheets_v <- readxl::excel_sheets(file_v)
+  
+  ## Read in
+  data_lsdt <- lapply(sheets_v, function(x) {
+    as.data.table(readxl::read_excel(path = file_v, sheet = x))
+  })
+  
+  ## Add names
+  names(data_lsdt) <- sheets_v
+  
+  ## Return
+  return(data_lsdt)
+}
+
+
+###
+### plotDensity ###################################################################################
+###
+
+plotDensity <- function(density_ls, colors_ls, main_v, x_v, names_v = NULL, lwd_v = 2) {
+  #' Plot Densities
+  #' @description Plot multiple density functions on same graph
+  #' @param density_ls list of either densities or vectors
+  #' @param colors_ls list of colors one for each element of density_ls
+  #' @param main_v character vector for title
+  #' @param x_v character vector for x-axis
+  #' @param names_v names to plot to legend. If NULL, will use names of density_ls.
+  #' @param lwd_v line width
+  #' @export
+  
+  ## Check input class and handle
+  class_v <- unique(class(density_ls))
+  
+  if (length(class_v) > 1) {
+    stop(sprintf("density_ls must be all one class, 'density' or 'numeric'. You have: %s\n",
+                 paste(class_v, collapse = " ; ")))
+  } else if (class_v != "density") {
+    density_ls <- lapply(density_ls, density)
+  } 
+  
+  ## Get legend
+  if (is.null(names_v)) {
+    names_v <- names(density_ls)
+  }
+  legend_v <- !is.null(names_v)
+  legendColor_v <- unlist(colors_ls)
+  
+  ## Get axis parameters
+  xMin_v <- min(unlist(lapply(density_ls, function(x) min(x$x))))
+  xMax_v <- max(unlist(lapply(density_ls, function(x) max(x$x))))
+  yMin_v <- min(unlist(lapply(density_ls, function(x) min(x$y))))
+  yMax_v <- max(unlist(lapply(density_ls, function(x) max(x$y))))
+  
+  ## Plot first
+  plot(density_ls[[1]],
+       xlim = c(xMin_v, xMax_v),
+       ylim = c(yMin_v, yMax_v),
+       main = main_v,
+       xlab = x_v,
+       col = colors_ls[[1]],
+       lwd = lwd_v)
+  
+  ## Plot the rest
+  density_ls <- density_ls[-1]
+  colors_ls <- colors_ls[-1]
+  sapply(seq_along(density_ls), function(x) lines(density_ls[[x]], col = colors_ls[[x]], lwd = lwd_v))
+  
+  ## Add legend
+  if (legend_v){
+    legend("topright", legend = names_v, col = legendColor_v, lwd = 2, bty = 'n')
+  } # fi
+  
+} # plotDensity
